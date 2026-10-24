@@ -1,6 +1,8 @@
 package com.x1launcher.app
 
 import android.app.Activity
+import android.app.ActivityManager
+import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -8,6 +10,10 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
+import android.os.Environment
+import android.os.Process
+import android.os.StatFs
+import android.provider.Settings
 import android.os.Build
 import android.os.Bundle
 import android.util.Base64
@@ -17,6 +23,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.app.usage.UsageStatsManager
 import android.view.View
 import android.graphics.Color
 import android.widget.Toast
@@ -24,6 +31,7 @@ import android.graphics.drawable.Drawable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
+import java.util.concurrent.TimeUnit
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
@@ -146,6 +154,110 @@ class MainActivity : Activity() {
         return result.toString()
     }
 
+    private fun deviceStatsJson(): String {
+        return try {
+            val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
+            val memory = ActivityManager.MemoryInfo()
+            activityManager.getMemoryInfo(memory)
+            val storage = StatFs(Environment.getDataDirectory().absolutePath)
+            val storageTotal = storage.totalBytes
+            val storageAvailable = storage.availableBytes
+            JSONObject()
+                .put("ok", true)
+                .put("ramTotal", memory.totalMem)
+                .put("ramAvailable", memory.availMem)
+                .put("ramUsed", (memory.totalMem - memory.availMem).coerceAtLeast(0L))
+                .put("storageTotal", storageTotal)
+                .put("storageAvailable", storageAvailable)
+                .toString()
+        } catch (_: Exception) {
+            JSONObject().put("ok", false).toString()
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun hasUsageAccessNow(): Boolean {
+        return try {
+            val appOps = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+            appOps.checkOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                packageName
+            ) == AppOpsManager.MODE_ALLOWED
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun usageStatsJson(): String {
+        if (!hasUsageAccessNow()) {
+            return JSONObject().put("authorized", false).put("apps", JSONArray()).toString()
+        }
+        return try {
+            val usageManager = getSystemService(USAGE_STATS_SERVICE) as UsageStatsManager
+            val endTime = System.currentTimeMillis()
+            val startTime = endTime - 7L * 24L * 60L * 60L * 1000L
+            val totals = HashMap<String, Long>()
+            usageManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime)
+                .forEach { stat ->
+                    if (stat.packageName != packageName && stat.totalTimeInForeground > 0L) {
+                        totals[stat.packageName] = (totals[stat.packageName] ?: 0L) + stat.totalTimeInForeground
+                    }
+                }
+
+            val apps = JSONArray()
+            totals.entries
+                .filter { it.value >= 60_000L }
+                .sortedByDescending { it.value }
+                .take(20)
+                .forEach { entry ->
+                    val launchIntent = packageManager.getLaunchIntentForPackage(entry.key)
+                    if (launchIntent != null) {
+                        val label = try {
+                            packageManager.getApplicationLabel(packageManager.getApplicationInfo(entry.key, 0)).toString()
+                        } catch (_: Exception) {
+                            entry.key
+                        }
+                        apps.put(
+                            JSONObject()
+                                .put("packageName", entry.key)
+                                .put("name", label)
+                                .put("millis", entry.value)
+                        )
+                    }
+                }
+            JSONObject()
+                .put("authorized", true)
+                .put("periodDays", 7)
+                .put("apps", apps)
+                .toString()
+        } catch (_: Exception) {
+            JSONObject().put("authorized", false).put("apps", JSONArray()).toString()
+        }
+    }
+
+    private fun probeRootAccess(): Pair<Boolean, String> {
+        var process: java.lang.Process? = null
+        return try {
+            process = ProcessBuilder("su", "-c", "id")
+                .redirectErrorStream(true)
+                .start()
+            val completed = process.waitFor(5, TimeUnit.SECONDS)
+            if (!completed) {
+                process.destroyForcibly()
+                false to "O teste de root não respondeu em 5 segundos. Verifique o gerenciador de root."
+            } else {
+                val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
+                val allowed = process.exitValue() == 0 && output.contains("uid=0")
+                if (allowed) true to "Acesso root confirmado. O comando de diagnóstico retornou uid=0."
+                else false to "Root não autorizado ou indisponível. Detalhe: ${output.take(180).ifBlank { "sem saída" }}"
+            }
+        } catch (_: Exception) {
+            process?.destroyForcibly()
+            false to "Não foi possível executar su. Root pode não estar instalado neste dispositivo."
+        }
+    }
+
     private inner class X1Bridge {
         @JavascriptInterface
         fun openExternal(url: String): Boolean = this@MainActivity.openExternal(url)
@@ -163,6 +275,67 @@ class MainActivity : Activity() {
             } catch (_: Exception) {
                 false
             }
+        }
+
+        @JavascriptInterface
+        fun getDeviceStats(): String = deviceStatsJson()
+
+        @JavascriptInterface
+        fun hasUsageAccess(): Boolean = hasUsageAccessNow()
+
+        @JavascriptInterface
+        fun openUsageAccessSettings(): Boolean {
+            return try {
+                startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                true
+            } catch (_: Exception) {
+                false
+            }
+        }
+
+        @JavascriptInterface
+        fun getUsageStats(): String = usageStatsJson()
+
+        @JavascriptInterface
+        fun openSystemSettings(section: String): Boolean {
+            val intent = when (section) {
+                "battery" -> Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+                "wifi" -> Intent(Settings.ACTION_WIFI_SETTINGS)
+                "storage" -> Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
+                "app" -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+                else -> return false
+            }.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            return try {
+                startActivity(intent)
+                true
+            } catch (_: Exception) {
+                try {
+                    startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    true
+                } catch (_: Exception) {
+                    false
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun checkRoot() {
+            Thread {
+                val (hasRoot, message) = probeRootAccess()
+                runOnUiThread {
+                    if (::webView.isInitialized) {
+                        val js = "window.onX1RootCheck && window.onX1RootCheck($hasRoot, ${JSONObject.quote(message)});"
+                        webView.evaluateJavascript(js, null)
+                    }
+                }
+            }.start()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::webView.isInitialized) {
+            webView.evaluateJavascript("window.x1RefreshAdvanced && window.x1RefreshAdvanced();", null)
         }
     }
 
