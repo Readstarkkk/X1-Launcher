@@ -15,6 +15,7 @@ header{position:relative;z-index:1;display:flex;align-items:center;justify-conte
 main{position:relative;z-index:1}.section{margin:0 0 30px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.heading-title{display:flex;align-items:center;gap:12px;font-size:clamp(17px,2.4vw,23px);font-weight:700;letter-spacing:-.025em}.heading-icon{color:var(--bright);font-size:25px;filter:drop-shadow(0 0 9px rgba(168,85,247,.4))}.text-link{background:transparent;border:0;color:var(--purple);font-size:14px;white-space:nowrap;padding:8px 0}.text-link:hover{color:var(--bright)}.rail-wrap{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:17px;background:linear-gradient(115deg,rgba(20,12,36,.85),rgba(10,7,17,.85));box-shadow:var(--glow);overflow:hidden}.rail{display:flex;gap:clamp(14px,2.2vw,28px);overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:#6636a6 transparent;padding:1px 1px 8px;scroll-snap-type:x proximity}.rail::-webkit-scrollbar{height:5px}.rail::-webkit-scrollbar-thumb{background:#6334a0;border-radius:10px}.app-card{border:0;background:transparent;text-align:center;flex:0 0 clamp(92px,12vw,136px);min-width:0;scroll-snap-align:start;padding:0 0 3px;transition:transform .18s ease}.app-card:hover{transform:translateY(-4px)}.app-icon{width:100%;aspect-ratio:1;display:grid;place-items:center;background:radial-gradient(circle at 30% 10%,rgba(168,85,247,.15),transparent 60%),linear-gradient(145deg,#171026,#0b0813);border:1px solid rgba(168,85,247,.72);border-radius:21px;box-shadow:inset 0 0 24px rgba(124,58,237,.06);overflow:hidden}.app-icon svg{width:62%;height:62%;max-width:78px;max-height:78px;display:block;filter:drop-shadow(0 5px 9px rgba(0,0,0,.25))}.app-name{display:block;font-size:14px;line-height:1.3;color:#e9dfff;margin-top:11px;overflow-wrap:anywhere}.app-meta{display:block;color:var(--muted);font-size:11px;line-height:1.3;margin-top:5px}.catalog-note{color:var(--muted);font-size:12px;line-height:1.5;margin:0 0 12px}.rail-arrow{display:none;position:absolute;right:8px;top:38%;width:38px;height:55px;border-radius:12px;border:1px solid var(--line);background:rgba(13,7,22,.9);font-size:27px;color:var(--bright);z-index:2}.bottom-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,4vw,48px);margin:42px 16px 20px}.big-button{min-height:78px;display:flex;align-items:center;justify-content:center;gap:16px;border:1.5px solid var(--purple);border-radius:22px;background:linear-gradient(110deg,rgba(36,17,58,.78),rgba(13,8,22,.9));box-shadow:0 0 0 1px rgba(168,85,247,.12),0 0 25px rgba(124,58,237,.1);font-size:clamp(14px,2.1vw,20px);font-weight:700;transition:transform .18s,border-color .18s,box-shadow .18s}.big-button:hover{transform:translateY(-2px);border-color:var(--bright);box-shadow:0 0 30px rgba(168,85,247,.22)}.big-button .btn-icon{font-size:31px;color:var(--bright);line-height:1}.footer{text-align:center;color:#615371;font-size:11px;padding:18px 0 0;position:relative;z-index:1}
 /* Modais / telas auxiliares */
 .modal-backdrop{display:none;position:fixed;inset:0;z-index:30;background:rgba(4,2,8,.82);backdrop-filter:blur(10px);padding:18px;overflow:auto}.modal-backdrop.open{display:flex;align-items:center;justify-content:center}.modal{width:min(680px,100%);max-height:min(88vh,900px);overflow:auto;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#171027,#0b0812);box-shadow:0 0 60px rgba(124,58,237,.2);padding:23px}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.modal-head h2{font-size:22px;margin:0}.close-btn{border:1px solid #4f356a;background:#130b20;border-radius:12px;width:40px;height:40px;font-size:23px;color:var(--bright)}.setting-row{border-top:1px solid rgba(168,85,247,.18);padding:17px 0;display:flex;gap:20px;align-items:center;justify-content:space-between}.setting-text strong{display:block;font-size:14px}.setting-text small{display:block;color:var(--muted);margin-top:4px;line-height:1.4}.switch{appearance:none;width:47px;height:27px;flex:0 0 47px;border-radius:99px;background:#332541;position:relative;border:1px solid #5a426e}.switch:before{content:"";position:absolute;width:19px;height:19px;border-radius:50%;top:3px;left:3px;background:#b9a4cb;transition:transform .18s}.switch:checked{background:#6d28d9;border-color:#b56bff}.switch:checked:before{transform:translateX(20px);background:white}.range{width:130px;accent-color:var(--purple)}.primary-btn{border:1px solid var(--purple);background:linear-gradient(110deg,#6d28d9,#9333ea);border-radius:13px;padding:12px 16px;font-weight:700}.secondary-btn{border:1px solid #4c3760;background:#171023;border-radius:13px;padding:12px 16px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}.grid-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:17px}.grid-apps .app-card{width:100%;flex:auto}.game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.game-card{border:1px solid rgba(168,85,247,.35);border-radius:17px;padding:15px;background:rgba(15,9,25,.8);display:flex;gap:13px;align-items:center}.game-art{width:62px;height:62px;flex:0 0 62px;border-radius:15px;display:grid;place-items:center;font-size:26px;font-weight:900;background:linear-gradient(145deg,#44206e,#171024);border:1px solid #8449bc;color:#eedaff}.game-card strong{font-size:14px}.game-card small{display:block;color:var(--muted);margin-top:5px}.notice{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 18px}.toast{position:fixed;z-index:50;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#1b1129;border:1px solid var(--line);padding:11px 16px;border-radius:13px;box-shadow:var(--glow);font-size:13px;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+app-entry{position:relative;flex:0 0 clamp(92px,12vw,136px);min-width:0;scroll-snap-align:start}.app-entry .app-card{width:100%;flex:none}.gear-btn{position:absolute;right:5px;top:5px;z-index:3;width:30px;height:30px;border:1px solid rgba(216,164,255,.65);border-radius:50%;background:rgba(12,7,20,.92);color:#f0d6ff;font-size:16px;box-shadow:0 0 12px rgba(124,58,237,.35)}.gear-btn:active{transform:scale(.94)}.profile-label{display:block;margin:16px 0 7px;color:#e9dfff;font-weight:700;font-size:13px}.profile-select{display:block;width:100%;padding:13px;border:1px solid #68438c;border-radius:12px;background:#100b1d;color:#f8f4ff;font:inherit}.profile-warning{margin-top:18px;padding:12px;border:1px solid rgba(245,158,11,.3);border-radius:12px;background:rgba(120,70,10,.08)}#recentRail:empty:after{content:"Você ainda não abriu apps instalados pelo X1.";display:block;color:var(--muted);font-size:13px;padding:10px}.grid-apps .app-entry{width:100%;flex:auto;min-width:0}.grid-apps .app-entry .app-card{width:100%}
 body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}body.labels-hidden .app-name{display:none!important}
 @media(min-width:850px){.rail-arrow{display:block}.app-card{flex-basis:clamp(110px,10vw,145px)}.frame{padding-top:35px}.bottom-actions{max-width:900px;margin-left:auto;margin-right:auto}}@media(max-width:570px){.frame{padding-top:20px}.brand-mark{font-size:36px}.brand-caption{font-size:9px}.online{font-size:10px;padding:7px 9px}.section{margin-bottom:24px}.rail-wrap{padding:13px;border-radius:19px}.app-card{flex-basis:93px}.app-icon{border-radius:17px}.app-name{font-size:12px}.bottom-actions{margin:31px 0 16px;gap:10px}.big-button{min-height:70px;gap:9px;border-radius:17px;flex-direction:column;font-size:12px}.big-button .btn-icon{font-size:24px}.loader-ring{width:108px;height:108px;margin-top:36px}.loading-text{font-size:15px}.modal{padding:18px}.heading-title{gap:8px}.heading-icon{font-size:21px}}
 </style>
@@ -35,6 +36,16 @@ body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!i
   <section class="section">
     <div class="section-heading"><div class="heading-title"><span class="heading-icon">★</span> Seus Apps Mais Usados</div><button class="text-link" onclick="openAll('favorites')">Ver todos&nbsp; →</button></div>
     <div class="rail-wrap"><button class="rail-arrow" aria-label="Rolar aplicativos" onclick="scrollRail('favoritesRail',1)">›</button><div class="rail" id="favoritesRail"></div></div>
+  </section>
+  <section class="section">
+    <div class="section-heading"><div class="heading-title"><span class="heading-icon">↻</span> Jogos abertos recentemente</div><button class="text-link" onclick="clearRecent()">Limpar histórico</button></div>
+    <p class="catalog-note">O histórico é atualizado quando você abre um app instalado a partir do X1.</p>
+    <div class="rail-wrap"><div class="rail" id="recentRail"></div></div>
+  </section>
+  <section class="section">
+    <div class="section-heading"><div class="heading-title"><span class="heading-icon">🎮</span> Jogos e apps instalados</div><button class="text-link" onclick="refreshInstalled()">Atualizar&nbsp; ↻</button></div>
+    <p class="catalog-note">Toque em um app para abri-lo. A engrenagem salva preferências por app; o Android não permite que o X1 force automaticamente a resolução gráfica interna de jogos externos.</p>
+    <div class="rail-wrap"><div class="rail" id="installedRail"><p class="catalog-note">Lendo os aplicativos instalados...</p></div></div>
   </section>
   <section class="section">
     <div class="section-heading"><div class="heading-title"><span class="heading-icon">▣</span> Todos os Programas de PC</div><button class="text-link" onclick="openAll('programs')">Ver todos&nbsp; →</button></div>
@@ -71,6 +82,7 @@ body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!i
   <div class="game-card"><div class="game-art">S</div><div><strong>Steam</strong><small>Plataforma · Exemplo</small></div></div>
   <div class="game-card"><div class="game-art">+</div><div><strong>Mais jogos</strong><small>Em breve</small></div></div>
 </div><div class="modal-actions"><button class="primary-btn" onclick="toast('A loja ainda é apenas uma demonstração visual.')">Explorar loja</button></div></div></div>
+<div class="modal-backdrop" id="profileModal" onclick="backdropClose(event,'profileModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><div class="modal-head"><h2 id="profileTitle">⚙ Perfil do app</h2><button class="close-btn" onclick="closeModal('profileModal')" aria-label="Fechar">×</button></div><p class="notice" id="profileAppName"></p><label class="profile-label" for="profilePreset">Modo de preferência</label><select id="profilePreset" class="profile-select"><option>Muito Rápido</option><option>Performance</option><option>Estabilidade</option><option>Qualidade</option></select><label class="profile-label" for="profileResolution">Resolução desejada</label><select id="profileResolution" class="profile-select"><option value="520p">520p — mínimo</option><option value="720p">720p — HD</option><option value="900p">900p</option><option value="1080p">1080p — Full HD</option><option value="1440p">1440p — 2K</option><option value="2160p">2160p — 4K</option></select><p class="notice profile-warning">Essas escolhas são salvas como preferência no X1. Elas não alteram, por si só, a resolução ou os gráficos de jogos externos. Isso depende do suporte de cada jogo e do Android.</p><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('profileModal')">Cancelar</button><button class="primary-btn" onclick="saveProfile()">Salvar perfil</button></div></div></div>
 <div class="modal-backdrop" id="allModal" onclick="backdropClose(event,'allModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="allTitle"><div class="modal-head"><h2 id="allTitle">Aplicativos</h2><button class="close-btn" onclick="closeModal('allModal')" aria-label="Fechar">×</button></div><div class="grid-apps" id="allGrid"></div></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
@@ -125,28 +137,69 @@ const ps1Projects=[
  {name:'Mega Man X4',icon:'steam',sub:'Pesquisa de código',url:'https://github.com/search?q=Mega%20Man%20X4%20decompilation&type=repositories'},
  {name:'PS1 Bare Metal',icon:'vscode',sub:'Demos e homebrew',url:'https://github.com/search?q=PS1%20bare%20metal%20homebrew&type=repositories'}
 ];
+let activeProfileApp=null;
 function makeCard(app){
+ const entry=document.createElement('div');entry.className='app-entry';
  const b=document.createElement('button');b.className='app-card';
- const iconMarkup=icons[app.icon]||`<span style="font-size:23px;font-weight:900;color:var(--bright)">${app.badge||'X1'}</span>`;
- b.innerHTML=`<span class="app-icon">${iconMarkup}</span><span class="app-name">${app.name}</span>${app.sub?`<small class="app-meta">${app.sub}</small>`:''}`;
- b.setAttribute('aria-label',app.name+(app.sub?` — ${app.sub}`:''));
+ const iconMarkup=icons[app.icon]||'<span style="font-size:23px;font-weight:900;color:var(--bright)">'+escapeHtml(app.badge||'X1')+'</span>';
+ b.innerHTML='<span class="app-icon">'+iconMarkup+'</span><span class="app-name">'+escapeHtml(app.name)+'</span>'+(app.sub?'<small class="app-meta">'+escapeHtml(app.sub)+'</small>':'');
+ b.setAttribute('aria-label',app.name+(app.sub?' — '+app.sub:''));
  b.addEventListener('click',()=>{
-   if(app.url){
-     const opened=window.open(app.url,'_blank');
-     if(!opened) window.location.href=app.url;
-   } else {
-     toast(`${app.name}: botão demonstrativo — execução de programas ainda não integrada.`);
-   }
+  if(app.packageName){
+   let launched=false;try{launched=!!(window.X1&&window.X1.launchApp(app.packageName));}catch(e){}
+   if(launched){recordRecent(app);toast('Abrindo '+app.name+'…');}
+   else toast('Não foi possível abrir '+app.name+'. Talvez o app tenha sido desinstalado.');
+   return;
+  }
+  if(app.url){
+   let opened=false;try{opened=!!(window.X1&&window.X1.openExternal(app.url));}catch(e){}
+   if(!opened){try{window.location.href=app.url;}catch(e){toast('Não foi possível abrir o link.');}}
+  }else toast(app.name+': ainda não há integração de execução para este programa.');
  });
- return b;
+ entry.appendChild(b);
+ if(app.packageName){
+  const gear=document.createElement('button');gear.className='gear-btn';gear.type='button';gear.textContent='⚙';gear.setAttribute('aria-label','Configurações de '+app.name);
+  gear.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openProfile(app);});entry.appendChild(gear);
+ }
+ return entry;
 }
-function renderRail(id,apps){const rail=document.getElementById(id);apps.forEach(app=>rail.appendChild(makeCard(app)));}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
+function renderRail(id,apps){const rail=document.getElementById(id);rail.innerHTML='';apps.forEach(app=>rail.appendChild(makeCard(app)));}
+function readRecent(){try{return JSON.parse(localStorage.getItem('x1RecentApps')||'[]');}catch(e){return [];}}
+function recordRecent(app){if(!app.packageName)return;const recent=readRecent().filter(x=>x.packageName!==app.packageName);recent.unshift({name:app.name,packageName:app.packageName,icon:app.icon||'',badge:(app.name||'X').trim().charAt(0),sub:'Aberto recentemente'});try{localStorage.setItem('x1RecentApps',JSON.stringify(recent.slice(0,12)));}catch(e){}renderRail('recentRail',readRecent());}
+function clearRecent(){try{localStorage.removeItem('x1RecentApps');}catch(e){}renderRail('recentRail',[]);toast('Histórico limpo.');}
+function refreshInstalled(){
+ const rail=document.getElementById('installedRail');rail.innerHTML='<p class="catalog-note">Lendo os aplicativos instalados...</p>';
+ try{
+  if(!window.X1||!window.X1.getInstalledApps){rail.innerHTML='<p class="catalog-note">Esta versão não oferece acesso à lista de apps do Android.</p>';return;}
+  const installed=JSON.parse(window.X1.getInstalledApps()||'[]');
+  if(!installed.length){rail.innerHTML='<p class="catalog-note">Nenhum app instalado e iniciável foi encontrado.</p>';return;}
+  const normalized=installed.map(a=>({name:a.name,packageName:a.packageName,sub:a.isGame?'Jogo instalado':'App instalado',badge:(a.name||'X').trim().charAt(0).toUpperCase(),icon:a.isGame?'roblox':'earth'}));
+  renderRail('installedRail',normalized);
+ }catch(e){rail.innerHTML='<p class="catalog-note">Não foi possível ler a lista de apps. Reabra o X1 e tente atualizar.</p>';}
+}
+function loadRecent(){renderRail('recentRail',readRecent());}
+function openProfile(app){
+ activeProfileApp=app;document.getElementById('profileAppName').textContent=app.name+' · '+app.packageName;
+ let profiles={};try{profiles=JSON.parse(localStorage.getItem('x1Profiles')||'{}');}catch(e){}
+ const p=profiles[app.packageName]||{preset:'Performance',resolution:'1080p'};
+ document.getElementById('profilePreset').value=p.preset;document.getElementById('profileResolution').value=p.resolution;openModal('profileModal');
+}
+function saveProfile(){
+ if(!activeProfileApp)return;
+ let profiles={};try{profiles=JSON.parse(localStorage.getItem('x1Profiles')||'{}');}catch(e){}
+ const preset=document.getElementById('profilePreset').value,resolution=document.getElementById('profileResolution').value;
+ profiles[activeProfileApp.packageName]={preset,resolution,updatedAt:Date.now()};
+ try{localStorage.setItem('x1Profiles',JSON.stringify(profiles));}catch(e){}
+ closeModal('profileModal');toast('Preferências de '+activeProfileApp.name+' salvas. O Android pode não aplicar gráficos/resolução automaticamente.');
+}
+
 function scrollRail(id,dir){document.getElementById(id).scrollBy({left:dir*360,behavior:document.body.classList.contains('no-motion')?'auto':'smooth'});}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function backdropClose(e,id){if(e.target.id===id)closeModal(id);}
 function openAll(which){
- const catalogues={favorites:{list:favorites,title:'Seus Apps Mais Usados'},programs:{list:programs,title:'Todos os Programas de PC'},ports:{list:ports,title:'Ports e Apps para Testar'},ps1:{list:ps1Projects,title:'Jogos e projetos de PS1'}};
+ const catalogues={favorites:{list:favorites,title:'Seus Apps Mais Usados'},programs:{list:programs,title:'Todos os Programas de PC'},ports:{list:ports,title:'Ports e Apps para Testar'},ps1:{list:ps1Projects,title:'Jogos e projetos de PS1'},recent:{list:readRecent(),title:'Jogos abertos recentemente'}};
  const selected=catalogues[which]||catalogues.programs;const title=document.getElementById('allTitle');title.textContent=selected.title;
  const grid=document.getElementById('allGrid');grid.innerHTML='';selected.list.forEach(app=>grid.appendChild(makeCard(app)));openModal('allModal');
 }
@@ -157,7 +210,7 @@ function saveSettings(){const s={motion:document.getElementById('motionToggle').
 function resetSettings(){document.getElementById('motionToggle').checked=true;document.getElementById('glowRange').value=70;document.getElementById('homeToggle').checked=true;saveSettings();}
 document.getElementById('glowRange').addEventListener('input',e=>applyGlow(Number(e.target.value)));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'));});
-renderRail('favoritesRail',favorites);renderRail('programsRail',programs);renderRail('portsRail',ports);renderRail('ps1Rail',ps1Projects);loadSettings();
+renderRail('favoritesRail',favorites);renderRail('programsRail',programs);renderRail('portsRail',ports);renderRail('ps1Rail',ps1Projects);loadSettings();loadRecent();refreshInstalled();
 // A porcentagem cobre as etapas de preparação desta interface, não o carregamento de programas externos.
 const stages=[{p:16,t:'Inicializando interface...'}, {p:38,t:'Preparando ícones...'}, {p:64,t:'Organizando aplicativos...'}, {p:86,t:'Aplicando tema violeta...'}, {p:100,t:'Launcher pronto'}];let stage=0;function advanceLoad(){const s=stages[stage];document.getElementById('percent').textContent=s.p+'%';document.getElementById('loaderRing').style.background=`conic-gradient(var(--bright) 0deg ${s.p*3.6}deg,rgba(168,85,247,.14) ${s.p*3.6}deg 360deg)`;document.getElementById('loadingText').textContent=s.t;stage++;if(stage<stages.length){setTimeout(advanceLoad,stage===1?260:stage===2?320:stage===3?300:300);}else{setTimeout(()=>document.getElementById('loading').classList.add('done'),260);}}setTimeout(advanceLoad,170);
 </script>
