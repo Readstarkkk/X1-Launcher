@@ -33,40 +33,14 @@ body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!i
   <div class="online"><i></i><span>Interface pronta</span></div>
 </header>
 <main>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">★</span> Seus Apps Mais Usados</div><button class="text-link" onclick="openAll('favorites')">Ver todos&nbsp; →</button></div>
-    <div class="rail-wrap"><button class="rail-arrow" aria-label="Rolar aplicativos" onclick="scrollRail('favoritesRail',1)">›</button><div class="rail" id="favoritesRail"></div></div>
-  </section>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">↻</span> Jogos abertos recentemente</div><button class="text-link" onclick="clearRecent()">Limpar histórico</button></div>
-    <p class="catalog-note">O histórico é atualizado quando você abre um app instalado a partir do X1.</p>
-    <div class="rail-wrap"><div class="rail" id="recentRail"></div></div>
-  </section>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">🎮</span> Jogos e apps instalados</div><button class="text-link" onclick="refreshInstalled()">Atualizar&nbsp; ↻</button></div>
-    <p class="catalog-note">Toque em um app para abri-lo. A engrenagem salva preferências por app; o Android não permite que o X1 force automaticamente a resolução gráfica interna de jogos externos.</p>
-    <div class="rail-wrap"><div class="rail" id="installedRail"><p class="catalog-note">Lendo os aplicativos instalados...</p></div></div>
-  </section>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">▣</span> Todos os Programas de PC</div><button class="text-link" onclick="openAll('programs')">Ver todos&nbsp; →</button></div>
-    <div class="rail-wrap"><button class="rail-arrow" aria-label="Rolar programas" onclick="scrollRail('programsRail',1)">›</button><div class="rail" id="programsRail"></div></div>
-  </section>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">⬇</span> Ports e Apps para Testar</div><button class="text-link" onclick="openAll('ports')">Ver todos&nbsp; →</button></div>
-    <p class="catalog-note">Links externos enviados para o catálogo. Os arquivos não foram verificados; APK/XAPK não são instalados nem executados pelo X1.</p>
-    <div class="rail-wrap"><button class="rail-arrow" aria-label="Rolar ports e apps" onclick="scrollRail('portsRail',1)">›</button><div class="rail" id="portsRail"></div></div>
-  </section>
-  <section class="section">
-    <div class="section-heading"><div class="heading-title"><span class="heading-icon">🎮</span> Jogos e projetos de PS1 para estudar</div><button class="text-link" onclick="openAll('ps1')">Ver todos&nbsp; →</button></div>
-    <p class="catalog-note">Os cartões abrem pesquisas de código-fonte/projetos, não downloads diretos. Confirme existência, plataforma, licença e requisitos antes de reutilizar algo.</p>
-    <div class="rail-wrap"><button class="rail-arrow" aria-label="Rolar projetos de PS1" onclick="scrollRail('ps1Rail',1)">›</button><div class="rail" id="ps1Rail"></div></div>
-  </section>
+  
+  
+  
   <section class="bottom-actions">
     <button class="big-button" onclick="openModal('settingsModal')"><span class="btn-icon">⚙</span><span>Configurações</span></button>
-    <button class="big-button" onclick="openModal('storeModal')"><span class="btn-icon">🛒</span><span>Loja de Jogos</span></button>
   </section>
 </main>
-<div class="footer">X1 LAUNCHER · CATÁLOGO DE PORTS E PROJETOS · V1.1</div>
+<div class="footer">Criado por Juan Guilherme S.S.</div>
 </div>
 
 <div class="modal-backdrop" id="settingsModal" onclick="backdropClose(event,'settingsModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="modal-head"><h2 id="settingsTitle">⚙ Configurações</h2><button class="close-btn" onclick="closeModal('settingsModal')" aria-label="Fechar">×</button></div>
@@ -76,8 +50,7 @@ body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!i
   <div class="setting-row"><div class="setting-text"><strong>Mostrar nomes dos apps</strong><small>Você pode ocultar os nomes para deixar os ícones em destaque.</small></div><input class="switch" id="homeToggle" type="checkbox" checked></div>
   <div class="modal-actions"><button class="secondary-btn" onclick="resetSettings()">Restaurar padrão</button><button class="primary-btn" onclick="saveSettings()">Salvar preferências</button></div>
 </div></div>
-<div class="modal-backdrop" id="storeModal" onclick="backdropClose(event,'storeModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="storeTitle"><div class="modal-head"><h2 id="storeTitle">🛒 Loja de Jogos</h2><button class="close-btn" onclick="closeModal('storeModal')" aria-label="Fechar">×</button></div><p class="notice">Prévia visual da loja. Os itens abaixo são exemplos; a loja ainda não instala nem compra jogos.</p><div class="game-grid">
-  <div class="game-card"><div class="game-art">R</div><div><strong>Roblox</strong><small>Jogo · Exemplo</small></div></div>
+
   <div class="game-card"><div class="game-art">M</div><div><strong>Minecraft</strong><small>Jogo · Exemplo</small></div></div>
   <div class="game-card"><div class="game-art">S</div><div><strong>Steam</strong><small>Plataforma · Exemplo</small></div></div>
   <div class="game-card"><div class="game-art">+</div><div><strong>Mais jogos</strong><small>Em breve</small></div></div>
@@ -199,8 +172,8 @@ function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function backdropClose(e,id){if(e.target.id===id)closeModal(id);}
 function openAll(which){
- const catalogues={favorites:{list:favorites,title:'Seus Apps Mais Usados'},programs:{list:programs,title:'Todos os Programas de PC'},ports:{list:ports,title:'Ports e Apps para Testar'},ps1:{list:ps1Projects,title:'Jogos e projetos de PS1'},recent:{list:readRecent(),title:'Jogos abertos recentemente'}};
- const selected=catalogues[which]||catalogues.programs;const title=document.getElementById('allTitle');title.textContent=selected.title;
+ const catalogues={ports:{list:ports,title:'Ports e Apps para Testar'},recent:{list:readRecent(),title:'Jogos abertos recentemente'}};
+ const selected=catalogues[which]||catalogues.ports;const title=document.getElementById('allTitle');title.textContent=selected.title;
  const grid=document.getElementById('allGrid');grid.innerHTML='';selected.list.forEach(app=>grid.appendChild(makeCard(app)));openModal('allModal');
 }
 let toastTimer;function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2700);}
@@ -210,7 +183,7 @@ function saveSettings(){const s={motion:document.getElementById('motionToggle').
 function resetSettings(){document.getElementById('motionToggle').checked=true;document.getElementById('glowRange').value=70;document.getElementById('homeToggle').checked=true;saveSettings();}
 document.getElementById('glowRange').addEventListener('input',e=>applyGlow(Number(e.target.value)));
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'));});
-renderRail('favoritesRail',favorites);renderRail('programsRail',programs);renderRail('portsRail',ports);renderRail('ps1Rail',ps1Projects);loadSettings();loadRecent();refreshInstalled();
+renderRail('portsRail',ports);loadSettings();loadRecent();refreshInstalled();
 // A porcentagem cobre as etapas de preparação desta interface, não o carregamento de programas externos.
 const stages=[{p:16,t:'Inicializando interface...'}, {p:38,t:'Preparando ícones...'}, {p:64,t:'Organizando aplicativos...'}, {p:86,t:'Aplicando tema violeta...'}, {p:100,t:'Launcher pronto'}];let stage=0;function advanceLoad(){const s=stages[stage];document.getElementById('percent').textContent=s.p+'%';document.getElementById('loaderRing').style.background=`conic-gradient(var(--bright) 0deg ${s.p*3.6}deg,rgba(168,85,247,.14) ${s.p*3.6}deg 360deg)`;document.getElementById('loadingText').textContent=s.t;stage++;if(stage<stages.length){setTimeout(advanceLoad,stage===1?260:stage===2?320:stage===3?300:300);}else{setTimeout(()=>document.getElementById('loading').classList.add('done'),260);}}setTimeout(advanceLoad,170);
 </script>
