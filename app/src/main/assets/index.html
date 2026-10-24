@@ -26,6 +26,66 @@ body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!i
   <div class="loader-ring" id="loaderRing"><span id="percent">0%</span></div>
   <div class="loading-text" id="loadingText">Iniciando X1 Launcher...</div>
   <div class="loading-sub">Preparando interface</div>
+
+<!-- X1 SPLASH FAILSAFE -->
+<script id="x1SplashFailsafe">
+(function () {
+  var root = document.getElementById('loading');
+  if (!root) return;
+
+  var percent = document.getElementById('percent');
+  var ring = document.getElementById('loaderRing');
+  var label = document.getElementById('loadingText');
+  var started = Date.now();
+
+  var messages = [
+    'Inicializando interface...',
+    'Preparando componentes...',
+    'Organizando aplicativos...',
+    'Finalizando carregamento...',
+    'Launcher pronto'
+  ];
+
+  function hideLoading() {
+    root.classList.add('done');
+    root.style.opacity = '0';
+    root.style.visibility = 'hidden';
+  }
+
+  function tick() {
+    try {
+      var progress = Math.min(100, Math.floor((Date.now() - started) / 32));
+      var angle = progress * 3.6;
+
+      if (percent) percent.textContent = progress + '%';
+
+      if (ring) {
+        ring.style.background =
+          'conic-gradient(var(--bright) 0deg ' + angle +
+          'deg, rgba(168,85,247,.14) ' + angle + 'deg 360deg)';
+      }
+
+      if (label) {
+        var index = Math.min(4, Math.floor(progress / 25));
+        label.textContent = messages[index];
+      }
+
+      if (progress >= 100) {
+        hideLoading();
+        return;
+      }
+
+      setTimeout(tick, 60);
+    } catch (error) {
+      hideLoading();
+    }
+  }
+
+  setTimeout(tick, 80);
+  setTimeout(hideLoading, 5200);
+})();
+</script>
+
 </div>
 <div class="frame">
 <header>
