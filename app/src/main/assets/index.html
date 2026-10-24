@@ -2,249 +2,64 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08060f">
 <title>X1 Launcher</title>
 <style>
-:root{--bg:#08060f;--panel:#100b1d;--panel2:#151024;--purple:#a855f7;--purple2:#7c3aed;--bright:#d8a4ff;--text:#f8f4ff;--muted:#a69ab9;--line:rgba(168,85,247,.52);--glow:0 0 24px rgba(168,85,247,.18);--radius:22px}
-*{box-sizing:border-box}html{background:var(--bg);scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -20%,rgba(103,45,194,.23),transparent 45%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;overflow-x:hidden}button{font:inherit;color:inherit;cursor:pointer}button:focus-visible{outline:2px solid var(--bright);outline-offset:3px}.frame{max-width:1500px;margin:auto;padding:28px clamp(16px,4vw,58px) 34px;position:relative;min-height:100vh}.frame:before,.frame:after{content:"";position:fixed;pointer-events:none;z-index:0;width:180px;height:180px;border-color:#7c3aed;opacity:.33}.frame:before{top:-88px;left:-100px;border-top:2px solid;border-left:2px solid;transform:rotate(45deg)}.frame:after{right:-100px;bottom:-88px;border-right:2px solid;border-bottom:2px solid;transform:rotate(45deg)}
-/* Carregamento */
-#loading{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(ellipse at center,rgba(87,30,158,.2),transparent 38%),#07050c;transition:opacity .45s ease,visibility .45s ease}#loading.done{opacity:0;visibility:hidden}.x1-logo{font-weight:1000;letter-spacing:-.105em;font-style:italic;line-height:.9;color:#eedaff;text-shadow:0 0 8px #fff,0 0 24px #a855f7,0 0 62px rgba(124,58,237,.95);font-size:clamp(90px,18vw,170px);padding-right:.12em}.loader-ring{width:124px;height:124px;border-radius:50%;margin-top:48px;display:grid;place-items:center;position:relative;background:conic-gradient(var(--bright) 0deg,rgba(168,85,247,.1) 0deg);box-shadow:0 0 28px rgba(168,85,247,.2)}.loader-ring:before{content:"";position:absolute;inset:8px;background:#090610;border-radius:50%}#percent{position:relative;z-index:1;font-size:24px;color:var(--bright);font-variant-numeric:tabular-nums}.loading-text{margin-top:26px;color:var(--bright);font-size:17px;letter-spacing:.02em}.loading-sub{margin-top:8px;color:#786a8e;font-size:12px}
-/* Cabeçalho */
-header{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:35px}.brand{display:flex;align-items:center;gap:14px}.brand-mark{font-size:41px;line-height:1;font-weight:1000;font-style:italic;letter-spacing:-.11em;color:#ead2ff;text-shadow:0 0 20px rgba(168,85,247,.8);padding-right:5px}.brand-caption{font-size:11px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}.online{display:flex;align-items:center;gap:8px;border:1px solid rgba(168,85,247,.25);border-radius:999px;padding:8px 12px;color:#cbb9df;font-size:12px;background:rgba(18,11,30,.72)}.online i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#a855f7;box-shadow:0 0 12px #a855f7}
-main{position:relative;z-index:1}.section{margin:0 0 30px}.section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}.heading-title{display:flex;align-items:center;gap:12px;font-size:clamp(17px,2.4vw,23px);font-weight:700;letter-spacing:-.025em}.heading-icon{color:var(--bright);font-size:25px;filter:drop-shadow(0 0 9px rgba(168,85,247,.4))}.text-link{background:transparent;border:0;color:var(--purple);font-size:14px;white-space:nowrap;padding:8px 0}.text-link:hover{color:var(--bright)}.rail-wrap{position:relative;border:1px solid var(--line);border-radius:var(--radius);padding:17px;background:linear-gradient(115deg,rgba(20,12,36,.85),rgba(10,7,17,.85));box-shadow:var(--glow);overflow:hidden}.rail{display:flex;gap:clamp(14px,2.2vw,28px);overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;scrollbar-color:#6636a6 transparent;padding:1px 1px 8px;scroll-snap-type:x proximity}.rail::-webkit-scrollbar{height:5px}.rail::-webkit-scrollbar-thumb{background:#6334a0;border-radius:10px}.app-card{border:0;background:transparent;text-align:center;flex:0 0 clamp(92px,12vw,136px);min-width:0;scroll-snap-align:start;padding:0 0 3px;transition:transform .18s ease}.app-card:hover{transform:translateY(-4px)}.app-icon{width:100%;aspect-ratio:1;display:grid;place-items:center;background:radial-gradient(circle at 30% 10%,rgba(168,85,247,.15),transparent 60%),linear-gradient(145deg,#171026,#0b0813);border:1px solid rgba(168,85,247,.72);border-radius:21px;box-shadow:inset 0 0 24px rgba(124,58,237,.06);overflow:hidden}.app-icon svg{width:62%;height:62%;max-width:78px;max-height:78px;display:block;filter:drop-shadow(0 5px 9px rgba(0,0,0,.25))}.app-name{display:block;font-size:14px;line-height:1.3;color:#e9dfff;margin-top:11px;overflow-wrap:anywhere}.app-meta{display:block;color:var(--muted);font-size:11px;line-height:1.3;margin-top:5px}.catalog-note{color:var(--muted);font-size:12px;line-height:1.5;margin:0 0 12px}.rail-arrow{display:none;position:absolute;right:8px;top:38%;width:38px;height:55px;border-radius:12px;border:1px solid var(--line);background:rgba(13,7,22,.9);font-size:27px;color:var(--bright);z-index:2}.bottom-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(12px,4vw,48px);margin:42px 16px 20px}.big-button{min-height:78px;display:flex;align-items:center;justify-content:center;gap:16px;border:1.5px solid var(--purple);border-radius:22px;background:linear-gradient(110deg,rgba(36,17,58,.78),rgba(13,8,22,.9));box-shadow:0 0 0 1px rgba(168,85,247,.12),0 0 25px rgba(124,58,237,.1);font-size:clamp(14px,2.1vw,20px);font-weight:700;transition:transform .18s,border-color .18s,box-shadow .18s}.big-button:hover{transform:translateY(-2px);border-color:var(--bright);box-shadow:0 0 30px rgba(168,85,247,.22)}.big-button .btn-icon{font-size:31px;color:var(--bright);line-height:1}.footer{text-align:center;color:#615371;font-size:11px;padding:18px 0 0;position:relative;z-index:1}
-/* Modais / telas auxiliares */
-.modal-backdrop{display:none;position:fixed;inset:0;z-index:30;background:rgba(4,2,8,.82);backdrop-filter:blur(10px);padding:18px;overflow:auto}.modal-backdrop.open{display:flex;align-items:center;justify-content:center}.modal{width:min(680px,100%);max-height:min(88vh,900px);overflow:auto;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,#171027,#0b0812);box-shadow:0 0 60px rgba(124,58,237,.2);padding:23px}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}.modal-head h2{font-size:22px;margin:0}.close-btn{border:1px solid #4f356a;background:#130b20;border-radius:12px;width:40px;height:40px;font-size:23px;color:var(--bright)}.setting-row{border-top:1px solid rgba(168,85,247,.18);padding:17px 0;display:flex;gap:20px;align-items:center;justify-content:space-between}.setting-text strong{display:block;font-size:14px}.setting-text small{display:block;color:var(--muted);margin-top:4px;line-height:1.4}.switch{appearance:none;width:47px;height:27px;flex:0 0 47px;border-radius:99px;background:#332541;position:relative;border:1px solid #5a426e}.switch:before{content:"";position:absolute;width:19px;height:19px;border-radius:50%;top:3px;left:3px;background:#b9a4cb;transition:transform .18s}.switch:checked{background:#6d28d9;border-color:#b56bff}.switch:checked:before{transform:translateX(20px);background:white}.range{width:130px;accent-color:var(--purple)}.primary-btn{border:1px solid var(--purple);background:linear-gradient(110deg,#6d28d9,#9333ea);border-radius:13px;padding:12px 16px;font-weight:700}.secondary-btn{border:1px solid #4c3760;background:#171023;border-radius:13px;padding:12px 16px}.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;flex-wrap:wrap}.grid-apps{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:17px}.grid-apps .app-card{width:100%;flex:auto}.game-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:13px}.game-card{border:1px solid rgba(168,85,247,.35);border-radius:17px;padding:15px;background:rgba(15,9,25,.8);display:flex;gap:13px;align-items:center}.game-art{width:62px;height:62px;flex:0 0 62px;border-radius:15px;display:grid;place-items:center;font-size:26px;font-weight:900;background:linear-gradient(145deg,#44206e,#171024);border:1px solid #8449bc;color:#eedaff}.game-card strong{font-size:14px}.game-card small{display:block;color:var(--muted);margin-top:5px}.notice{color:var(--muted);font-size:13px;line-height:1.55;margin:0 0 18px}.toast{position:fixed;z-index:50;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#1b1129;border:1px solid var(--line);padding:11px 16px;border-radius:13px;box-shadow:var(--glow);font-size:13px;transition:opacity .2s,transform .2s;max-width:calc(100vw - 32px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
-app-entry{position:relative;flex:0 0 clamp(92px,12vw,136px);min-width:0;scroll-snap-align:start}.app-entry .app-card{width:100%;flex:none}.gear-btn{position:absolute;right:5px;top:5px;z-index:3;width:30px;height:30px;border:1px solid rgba(216,164,255,.65);border-radius:50%;background:rgba(12,7,20,.92);color:#f0d6ff;font-size:16px;box-shadow:0 0 12px rgba(124,58,237,.35)}.gear-btn:active{transform:scale(.94)}.profile-label{display:block;margin:16px 0 7px;color:#e9dfff;font-weight:700;font-size:13px}.profile-select{display:block;width:100%;padding:13px;border:1px solid #68438c;border-radius:12px;background:#100b1d;color:#f8f4ff;font:inherit}.profile-warning{margin-top:18px;padding:12px;border:1px solid rgba(245,158,11,.3);border-radius:12px;background:rgba(120,70,10,.08)}#recentRail:empty:after{content:"Você ainda não abriu apps instalados pelo X1.";display:block;color:var(--muted);font-size:13px;padding:10px}.grid-apps .app-entry{width:100%;flex:auto;min-width:0}.grid-apps .app-entry .app-card{width:100%}
-body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}body.labels-hidden .app-name{display:none!important}
-@media(min-width:850px){.rail-arrow{display:block}.app-card{flex-basis:clamp(110px,10vw,145px)}.frame{padding-top:35px}.bottom-actions{max-width:900px;margin-left:auto;margin-right:auto}}@media(max-width:570px){.frame{padding-top:20px}.brand-mark{font-size:36px}.brand-caption{font-size:9px}.online{font-size:10px;padding:7px 9px}.section{margin-bottom:24px}.rail-wrap{padding:13px;border-radius:19px}.app-card{flex-basis:93px}.app-icon{border-radius:17px}.app-name{font-size:12px}.bottom-actions{margin:31px 0 16px;gap:10px}.big-button{min-height:70px;gap:9px;border-radius:17px;flex-direction:column;font-size:12px}.big-button .btn-icon{font-size:24px}.loader-ring{width:108px;height:108px;margin-top:36px}.loading-text{font-size:15px}.modal{padding:18px}.heading-title{gap:8px}.heading-icon{font-size:21px}}
+:root{color-scheme:dark;--bg:#08060f;--panel:#120c1d;--panel2:#191027;--purple:#a855f7;--bright:#d8a4ff;--text:#f8f4ff;--muted:#a69ab9;--line:rgba(168,85,247,.38);--glow:0 0 24px rgba(168,85,247,.14)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}body{min-height:100vh;background:radial-gradient(ellipse at 50% -18%,rgba(103,45,194,.22),transparent 48%),var(--bg);overflow-x:hidden}button,input,select{font:inherit}button{color:inherit;cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--bright);outline-offset:3px}.frame{max-width:1180px;margin:auto;padding:20px clamp(14px,4vw,42px) 30px;min-height:100vh;position:relative}header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:26px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{font-size:38px;font-weight:1000;font-style:italic;letter-spacing:-.12em;color:#eedaff;text-shadow:0 0 22px #963ee8;padding-right:5px}.brand-title{font-weight:850;letter-spacing:.04em}.brand-sub{font-size:10px;letter-spacing:.22em;color:var(--muted);margin-top:3px}.status{border:1px solid var(--line);border-radius:999px;padding:8px 11px;font-size:11px;color:#d7c4e8;background:#120b1d;white-space:nowrap}.status i{display:inline-block;width:7px;height:7px;background:#b15cff;border-radius:50%;margin-right:7px;box-shadow:0 0 9px #b15cff}main{position:relative;z-index:1}.section{margin:0 0 25px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}.section-title{font-size:clamp(17px,2.7vw,22px);font-weight:760;letter-spacing:-.025em}.section-title .emoji{color:var(--bright);margin-right:8px}.link-button{background:none;border:0;color:var(--bright);font-size:13px;padding:8px 0}.note{margin:0 0 10px;font-size:12px;line-height:1.5;color:var(--muted)}.rail-wrap{border:1px solid var(--line);border-radius:20px;padding:13px;background:linear-gradient(120deg,rgba(25,15,39,.92),rgba(10,7,17,.93));box-shadow:var(--glow)}.rail{display:flex;gap:14px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:thin;scrollbar-color:#64329c transparent}.rail::-webkit-scrollbar{height:5px}.rail::-webkit-scrollbar-thumb{background:#64329c;border-radius:10px}.empty{font-size:12px;color:var(--muted);padding:10px 3px;line-height:1.5}.app-card{width:96px;flex:0 0 96px;min-width:0;position:relative;text-align:center;border:0;background:none;padding:0}.iconbox{width:96px;height:96px;display:grid;place-items:center;overflow:hidden;border:1px solid rgba(168,85,247,.6);border-radius:19px;background:radial-gradient(circle at 30% 10%,rgba(168,85,247,.17),transparent 65%),linear-gradient(145deg,#1b1129,#0b0812);box-shadow:inset 0 0 18px rgba(124,58,237,.07)}.iconbox img{width:100%;height:100%;object-fit:contain;padding:10px}.iconbox .letter{font-size:30px;font-weight:900;color:var(--bright)}.iconbox .planet{font-size:45px;filter:drop-shadow(0 0 12px rgba(181,103,255,.5))}.app-name{display:block;font-size:12px;line-height:1.3;margin-top:9px;overflow-wrap:anywhere;color:#eee2ff}.app-sub{display:block;font-size:10px;color:var(--muted);margin-top:4px;line-height:1.3}.gear{position:absolute;right:-4px;top:-4px;width:28px;height:28px;border:1px solid #8150aa;background:#170d24;border-radius:50%;font-size:14px;z-index:2}.bottom-actions{display:grid;grid-template-columns:1fr;max-width:420px;margin:36px auto 10px}.primary-tile{min-height:70px;display:flex;align-items:center;justify-content:center;gap:13px;border:1px solid var(--purple);border-radius:19px;background:linear-gradient(110deg,#20112f,#100918);box-shadow:0 0 20px rgba(168,85,247,.12);font-weight:750}.primary-tile .tile-icon{font-size:25px;color:var(--bright)}.footer{text-align:center;color:#615371;font-size:11px;padding:20px 0 4px}.modal-backdrop{display:none;position:fixed;inset:0;z-index:30;background:rgba(3,2,8,.84);backdrop-filter:blur(10px);padding:16px;overflow:auto;align-items:center;justify-content:center}.modal-backdrop.open{display:flex}.modal{width:min(620px,100%);max-height:90vh;overflow:auto;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#1b1129,#0b0812);box-shadow:0 0 50px rgba(124,58,237,.18);padding:20px}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.modal-head h2{font-size:20px;margin:0}.close{width:38px;height:38px;border:1px solid #57376e;background:#140d1e;border-radius:12px;font-size:22px;color:var(--bright)}.setting-row{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 0;border-top:1px solid rgba(168,85,247,.18)}.setting-row strong{display:block;font-size:14px}.setting-row small{display:block;color:var(--muted);font-size:11px;line-height:1.45;margin-top:4px}.switch{width:46px;height:26px;flex-shrink:0;accent-color:#a855f7}.range{width:125px;accent-color:#a855f7}.primary,.secondary{padding:11px 14px;border-radius:12px;font-weight:700}.primary{border:1px solid #a855f7;background:#6d28d9}.secondary{border:1px solid #55396b;background:#170e23}.actions{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;margin-top:19px}.field-label{display:block;font-weight:700;font-size:13px;margin:16px 0 7px}.select{width:100%;padding:12px;border:1px solid #68438c;border-radius:12px;background:#100b1d;color:var(--text)}.small-note{font-size:12px;color:var(--muted);line-height:1.5;margin:14px 0}.all-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:20px 9px}.toast{position:fixed;z-index:50;left:50%;bottom:25px;transform:translate(-50%,16px);opacity:0;pointer-events:none;transition:.2s;background:#1b1129;border:1px solid var(--line);border-radius:12px;padding:11px 15px;color:var(--text);font-size:12px;text-align:center;max-width:90vw}.toast.show{opacity:1;transform:translate(-50%,0)}#loading{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(ellipse at center,rgba(87,30,158,.2),transparent 40%),#07050c;transition:opacity .3s ease,visibility .3s ease}#loading.done{opacity:0;visibility:hidden;pointer-events:none}.splash-logo{font-size:clamp(90px,18vw,150px);font-weight:1000;font-style:italic;letter-spacing:-.12em;padding-right:.12em;color:#eedaff;text-shadow:0 0 10px #fff,0 0 28px #a855f7,0 0 60px rgba(124,58,237,.9)}.ring{width:102px;height:102px;border-radius:50%;display:grid;place-items:center;margin-top:28px;position:relative;background:conic-gradient(var(--bright) 0deg,rgba(168,85,247,.12) 0deg);box-shadow:0 0 28px rgba(168,85,247,.2)}.ring:before{content:"";position:absolute;inset:7px;background:#090610;border-radius:50%}.ring span{position:relative;font-size:22px;color:var(--bright)}.splash-text{margin-top:20px;font-size:15px;color:var(--bright)}.splash-sub{margin-top:7px;font-size:11px;color:#786a8e}body.no-motion *,body.no-motion *:before,body.no-motion *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}body.labels-hidden .app-name{display:none!important}@media(min-width:700px){.app-card{width:112px;flex-basis:112px}.iconbox{width:112px;height:112px}.frame{padding-top:28px}}@media(max-width:420px){.app-card{width:84px;flex-basis:84px}.iconbox{width:84px;height:84px;border-radius:17px}.status{font-size:10px;padding:7px 8px}.brand-mark{font-size:34px}.frame{padding-top:16px}}
 </style>
 </head>
 <body>
-<div id="loading" aria-live="polite">
-  <div class="x1-logo">X1</div>
-  <div class="loader-ring" id="loaderRing"><span id="percent">0%</span></div>
-  <div class="loading-text" id="loadingText">Iniciando X1 Launcher...</div>
-  <div class="loading-sub">Preparando interface</div>
-
-<!-- X1 SPLASH FAILSAFE -->
+<div id="loading" aria-live="polite"><div class="splash-logo">X1</div><div class="ring" id="splashRing"><span id="splashPercent">0%</span></div><div class="splash-text" id="splashText">Iniciando X1 Launcher...</div><div class="splash-sub">Preparando interface</div></div>
 <script id="x1SplashFailsafe">
-(function () {
-  var root = document.getElementById('loading');
-  if (!root) return;
-
-  var percent = document.getElementById('percent');
-  var ring = document.getElementById('loaderRing');
-  var label = document.getElementById('loadingText');
-  var started = Date.now();
-
-  var messages = [
-    'Inicializando interface...',
-    'Preparando componentes...',
-    'Organizando aplicativos...',
-    'Finalizando carregamento...',
-    'Launcher pronto'
-  ];
-
-  function hideLoading() {
-    root.classList.add('done');
-    root.style.opacity = '0';
-    root.style.visibility = 'hidden';
-  }
-
-  function tick() {
-    try {
-      var progress = Math.min(100, Math.floor((Date.now() - started) / 32));
-      var angle = progress * 3.6;
-
-      if (percent) percent.textContent = progress + '%';
-
-      if (ring) {
-        ring.style.background =
-          'conic-gradient(var(--bright) 0deg ' + angle +
-          'deg, rgba(168,85,247,.14) ' + angle + 'deg 360deg)';
-      }
-
-      if (label) {
-        var index = Math.min(4, Math.floor(progress / 25));
-        label.textContent = messages[index];
-      }
-
-      if (progress >= 100) {
-        hideLoading();
-        return;
-      }
-
-      setTimeout(tick, 60);
-    } catch (error) {
-      hideLoading();
-    }
-  }
-
-  setTimeout(tick, 80);
-  setTimeout(hideLoading, 5200);
-})();
+/* Proteção independente: a splash some mesmo se o script principal tiver erro. */
+(function(){var start=Date.now(),done=false;function hide(){if(done)return;done=true;var el=document.getElementById('loading');if(el)el.classList.add('done');}function tick(){var p=Math.min(100,Math.floor((Date.now()-start)/24));var n=document.getElementById('splashPercent'),r=document.getElementById('splashRing'),t=document.getElementById('splashText');if(n)n.textContent=p+'%';if(r)r.style.background='conic-gradient(var(--bright) 0deg '+(p*3.6)+'deg,rgba(168,85,247,.12) '+(p*3.6)+'deg 360deg)';if(t)t.textContent=p<30?'Inicializando interface...':p<65?'Organizando aplicativos...':p<95?'Aplicando preferências...':'Launcher pronto';if(p>=100){hide();return;}setTimeout(tick,45);}setTimeout(tick,50);setTimeout(hide,4200);})();
 </script>
-
-</div>
 <div class="frame">
-<header>
-  <div class="brand"><div class="brand-mark">X1</div><div><div style="font-weight:800;letter-spacing:.03em">LAUNCHER</div><div class="brand-caption">Seu espaço gamer</div></div></div>
-  <div class="online"><i></i><span>Interface pronta</span></div>
-</header>
+<header><div class="brand"><div class="brand-mark">X1</div><div><div class="brand-title">LAUNCHER</div><div class="brand-sub">SEU ESPAÇO GAMER</div></div></div><div class="status"><i></i>Interface pronta</div></header>
 <main>
-  
-  
-  
-  <section class="bottom-actions">
-    <button class="big-button" onclick="openModal('settingsModal')"><span class="btn-icon">⚙</span><span>Configurações</span></button>
-  </section>
-</main>
-<div class="footer">Criado por Juan Guilherme S.S.</div>
-</div>
-
-<div class="modal-backdrop" id="settingsModal" onclick="backdropClose(event,'settingsModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle"><div class="modal-head"><h2 id="settingsTitle">⚙ Configurações</h2><button class="close-btn" onclick="closeModal('settingsModal')" aria-label="Fechar">×</button></div>
-  <p class="notice">Personalize a aparência da interface. Estas opções ficam salvas neste navegador.</p>
-  <div class="setting-row"><div class="setting-text"><strong>Animações</strong><small>Ativa ou reduz transições e efeitos visuais.</small></div><input class="switch" id="motionToggle" type="checkbox" checked></div>
-  <div class="setting-row"><div class="setting-text"><strong>Brilho violeta</strong><small>Ajusta a intensidade dos detalhes neon.</small></div><input class="range" id="glowRange" type="range" min="20" max="100" value="70" aria-label="Brilho violeta"></div>
-  <div class="setting-row"><div class="setting-text"><strong>Mostrar nomes dos apps</strong><small>Você pode ocultar os nomes para deixar os ícones em destaque.</small></div><input class="switch" id="homeToggle" type="checkbox" checked></div>
-  <div class="modal-actions"><button class="secondary-btn" onclick="resetSettings()">Restaurar padrão</button><button class="primary-btn" onclick="saveSettings()">Salvar preferências</button></div>
-</div></div>
-
-  <div class="game-card"><div class="game-art">M</div><div><strong>Minecraft</strong><small>Jogo · Exemplo</small></div></div>
-  <div class="game-card"><div class="game-art">S</div><div><strong>Steam</strong><small>Plataforma · Exemplo</small></div></div>
-  <div class="game-card"><div class="game-art">+</div><div><strong>Mais jogos</strong><small>Em breve</small></div></div>
-</div><div class="modal-actions"><button class="primary-btn" onclick="toast('A loja ainda é apenas uma demonstração visual.')">Explorar loja</button></div></div></div>
-<div class="modal-backdrop" id="profileModal" onclick="backdropClose(event,'profileModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle"><div class="modal-head"><h2 id="profileTitle">⚙ Perfil do app</h2><button class="close-btn" onclick="closeModal('profileModal')" aria-label="Fechar">×</button></div><p class="notice" id="profileAppName"></p><label class="profile-label" for="profilePreset">Modo de preferência</label><select id="profilePreset" class="profile-select"><option>Muito Rápido</option><option>Performance</option><option>Estabilidade</option><option>Qualidade</option></select><label class="profile-label" for="profileResolution">Resolução desejada</label><select id="profileResolution" class="profile-select"><option value="520p">520p — mínimo</option><option value="720p">720p — HD</option><option value="900p">900p</option><option value="1080p">1080p — Full HD</option><option value="1440p">1440p — 2K</option><option value="2160p">2160p — 4K</option></select><p class="notice profile-warning">Essas escolhas são salvas como preferência no X1. Elas não alteram, por si só, a resolução ou os gráficos de jogos externos. Isso depende do suporte de cada jogo e do Android.</p><div class="modal-actions"><button class="secondary-btn" onclick="closeModal('profileModal')">Cancelar</button><button class="primary-btn" onclick="saveProfile()">Salvar perfil</button></div></div></div>
-<div class="modal-backdrop" id="allModal" onclick="backdropClose(event,'allModal')"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="allTitle"><div class="modal-head"><h2 id="allTitle">Aplicativos</h2><button class="close-btn" onclick="closeModal('allModal')" aria-label="Fechar">×</button></div><div class="grid-apps" id="allGrid"></div></div></div>
-<div class="toast" id="toast" role="status"></div>
+<section class="section"><div class="section-head"><div class="section-title"><span class="emoji">↻</span>Jogos abertos recentemente</div><button class="link-button" id="clearRecent">Limpar</button></div><p class="note">Os apps entram aqui quando você os abre pelo X1.</p><div class="rail-wrap"><div class="rail" id="recentRail"><div class="empty">Você ainda não abriu apps pelo X1.</div></div></div></section>
+<section class="section"><div class="section-head"><div class="section-title"><span class="emoji">🎮</span>Jogos e apps instalados</div><button class="link-button" id="refreshInstalled">Atualizar ↻</button></div><p class="note">Toque em um ícone para abrir o aplicativo. A engrenagem salva preferências por app.</p><div class="rail-wrap"><div class="rail" id="installedRail"><div class="empty">Carregando aplicativos...</div></div></div></section>
+<section class="section"><div class="section-head"><div class="section-title"><span class="emoji">⬇</span>Ports e Apps para Testar</div><button class="link-button" id="viewPorts">Ver todos →</button></div><p class="note">Os links abrem páginas externas. Confira a origem e a compatibilidade antes de instalar qualquer arquivo.</p><div class="rail-wrap"><div class="rail" id="portsRail"></div></div></section>
+<div class="bottom-actions"><button class="primary-tile" id="openSettings"><span class="tile-icon">⚙</span>Configurações</button></div>
+</main><div class="footer">Criado por Juan Guilherme S.S.</div></div>
+<div class="modal-backdrop" id="settingsModal"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>⚙ Configurações</h2><button class="close" data-close="settingsModal">×</button></div><p class="small-note">Personalize a aparência da interface. As opções ficam salvas no aplicativo.</p><div class="setting-row"><div><strong>Animações</strong><small>Reduzir transições para uma interface mais leve.</small></div><input class="switch" id="motionToggle" type="checkbox" checked></div><div class="setting-row"><div><strong>Brilho violeta</strong><small>Intensidade dos detalhes neon.</small></div><input class="range" id="glowRange" type="range" min="20" max="100" value="70"></div><div class="setting-row"><div><strong>Mostrar nomes dos apps</strong><small>Ocultar ou exibir nomes sob os ícones.</small></div><input class="switch" id="labelsToggle" type="checkbox" checked></div><div class="setting-row"><div><strong>Papel de parede</strong><small>Escolha uma imagem da galeria para o fundo.</small></div><button class="secondary" id="chooseWallpaper">Escolher imagem</button><input id="wallpaperInput" type="file" accept="image/*" hidden></div><div class="actions"><button class="secondary" id="resetSettings">Restaurar padrão</button><button class="primary" id="saveSettings">Salvar</button></div></div></div>
+<div class="modal-backdrop" id="profileModal"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>⚙ Perfil do app</h2><button class="close" data-close="profileModal">×</button></div><p class="small-note" id="profileAppName"></p><label class="field-label" for="profilePreset">Modo de preferência</label><select class="select" id="profilePreset"><option>Muito Rápido</option><option>Performance</option><option>Estabilidade</option><option>Qualidade</option></select><label class="field-label" for="profileResolution">Resolução desejada</label><select class="select" id="profileResolution"><option value="520p">520p</option><option value="720p">720p</option><option value="900p">900p</option><option value="1080p">1080p</option><option value="1440p">1440p</option><option value="2160p">2160p</option></select><p class="small-note">Essas preferências ficam salvas no X1. O Android não permite que o launcher force automaticamente a resolução ou os gráficos internos de todos os jogos.</p><div class="actions"><button class="secondary" data-close="profileModal">Cancelar</button><button class="primary" id="saveProfile">Salvar perfil</button></div></div></div>
+<div class="modal-backdrop" id="allPortsModal"><div class="modal" role="dialog" aria-modal="true"><div class="modal-head"><h2>Ports e Apps para Testar</h2><button class="close" data-close="allPortsModal">×</button></div><div class="all-grid" id="allPortsGrid"></div></div></div><div class="toast" id="toast" role="status"></div>
 <script>
-const icons={
- chrome:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Chrome"><circle cx="50" cy="50" r="46" fill="#e94436"/><path d="M50 50L26 91A46 46 0 0 1 6 30l44 0 23 0z" fill="#18a765"/><path d="M50 50l23-40A46 46 0 0 1 94 66H50z" fill="#f6c844"/><circle cx="50" cy="50" r="23" fill="#fff"/><circle cx="50" cy="50" r="19" fill="#2787ef"/></svg>`,
- roblox:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Roblox"><g transform="rotate(18 50 50)"><rect x="13" y="13" width="74" height="74" rx="5" fill="#f2f0f7"/><rect x="37" y="37" width="26" height="26" fill="#171323"/></g></svg>`,
- discord:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Discord"><rect x="7" y="7" width="86" height="86" rx="26" fill="#5865f2"/><path d="M27 31q23-13 46 0l8 36q-11 10-20 10l-4-7q7-2 10-5-17 8-34 0 4 3 10 5l-4 7q-10 0-20-10z" fill="#fff"/><circle cx="39" cy="50" r="5" fill="#5865f2"/><circle cx="62" cy="50" r="5" fill="#5865f2"/></svg>`,
- youtube:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do YouTube"><rect x="7" y="19" width="86" height="62" rx="21" fill="#ff2638"/><path d="M43 35l27 15-27 15z" fill="#fff"/></svg>`,
- spotify:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Spotify"><circle cx="50" cy="50" r="45" fill="#1ed760"/><g fill="none" stroke="#092b18" stroke-width="7" stroke-linecap="round"><path d="M25 38q28-9 52 6"/><path d="M29 51q24-7 44 5"/><path d="M33 63q18-5 35 4"/></g></svg>`,
- steam:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Steam"><defs><linearGradient id="steamg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#183e77"/><stop offset="1" stop-color="#071324"/></linearGradient></defs><circle cx="50" cy="50" r="48" fill="url(#steamg)"/><circle cx="65" cy="34" r="17" fill="none" stroke="#fff" stroke-width="8"/><circle cx="65" cy="34" r="7" fill="#fff"/><circle cx="36" cy="65" r="13" fill="none" stroke="#fff" stroke-width="7"/><path d="M43 60l16-17" stroke="#fff" stroke-width="9" stroke-linecap="round"/></svg>`,
- epic:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado da Epic Games"><path d="M22 8h56v69L50 93 22 77z" fill="#f5f1fa"/><path d="M27 13h46v60L50 87 27 73z" fill="#17131e"/><text x="50" y="43" text-anchor="middle" font-size="18" font-weight="900" fill="#fff">EPIC</text><text x="50" y="58" text-anchor="middle" font-size="12" font-weight="900" fill="#fff">GAMES</text></svg>`,
- vscode:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do Visual Studio Code"><path d="M71 7l22 10v66L71 93 33 62 17 75 6 67V34l11-8 16 13z" fill="#19a8ed"/><path d="M71 7v86L33 62l38-24-44 32-12-8 12-12-12-12 12-8 44 25z" fill="#087fc1"/><path d="M71 7l22 10v66L71 93z" fill="#32c5f4"/></svg>`,
- earth:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado de globo terrestre"><defs><linearGradient id="earthg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bce7ff"/><stop offset=".48" stop-color="#458dec"/><stop offset="1" stop-color="#0739a0"/></linearGradient></defs><circle cx="50" cy="50" r="45" fill="url(#earthg)"/><path d="M19 27l15-10 9 5-3 12 10 4-4 8-13-1-5 12-10-4-8-10zM56 15l13 7 2 11-10 8 7 9-6 11-13-7-1-17 8-9zM38 66l13-4 13 8-5 16-15 5-9-13z" fill="#74c7ec" opacity=".8"/></svg>`,
- vlc:`<svg viewBox="0 0 100 100" aria-label="Ícone estilizado do VLC"><path d="M43 9h14l7 19H36z" fill="#f6f4fa"/><path d="M36 32h28l8 21H28z" fill="#f5a623"/><path d="M28 57h44l9 18H19z" fill="#f77b18"/><path d="M18 77h64l9 12H9z" fill="#eeeaf5"/><path d="M43 9h14l7 19H36z" fill="#eeeaf5"/><path d="M36 32h28l8 21H28z" fill="#fff" opacity=".26"/></svg>`
-};
-const favorites=[
- {name:'Chrome',icon:'chrome',sub:'Navegador'}, {name:'Roblox',icon:'roblox',sub:'Jogo'}, {name:'Discord',icon:'discord',sub:'Comunicação'}, {name:'YouTube',icon:'youtube',sub:'Vídeos'}, {name:'Spotify',icon:'spotify',sub:'Música'}
-];
-const programs=[
- {name:'Steam',icon:'steam',sub:'Jogos'}, {name:'Epic Games',icon:'epic',sub:'Jogos'}, {name:'Visual Studio Code',icon:'vscode',sub:'Desenvolvimento'}, {name:'Google Earth',icon:'earth',sub:'Mapas'}, {name:'VLC Media Player',icon:'vlc',sub:'Multimídia'},
- {name:'Chrome',icon:'chrome',sub:'Navegador'}, {name:'Roblox',icon:'roblox',sub:'Jogo'}, {name:'Discord',icon:'discord',sub:'Comunicação'}, {name:'YouTube',icon:'youtube',sub:'Vídeos'}, {name:'Spotify',icon:'spotify',sub:'Música'}
-];
+'use strict';
 const ports=[
- {name:'A20',icon:'roblox',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/38lb17dec4c7tqq/com.demilion.a20-7.apk/file'},
- {name:'Monero App',icon:'earth',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/epcl55qftafokro/com.monero.app-4171_arm64-v8a.xapk/file'},
- {name:'Supreme Duelist',icon:'roblox',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/89y87hws259o2ah/com.Neurononfire.SupremeDuelist-581_arm64-v8a.xapk/file'},
- {name:'PSX Android',icon:'steam',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/xcztpibu68i1lq1/com.scee.psxandroid-26100001.apk/file'},
- {name:'DOOM',icon:'epic',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/dm2f5plxvbdvnei/DOOM.apk/file'},
- {name:'Pong',icon:'vscode',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/nd2tsow9d5mn687/net.bubik.pong-400017_arm64-v8a.xapk/file'},
- {name:'Tapper',icon:'vlc',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/atukv7lp4cpcdz4/Tapper.xapk/file'},
- {name:'The Backrooms',icon:'earth',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/nuumlohhd159brp/TheBackRoom.xapk/file'}
+{name:'A20',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/38lb17dec4c7tqq/com.demilion.a20-7.apk/file'},
+{name:'Monero App',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/epcl55qftafokro/com.monero.app-4171_arm64-v8a.xapk/file'},
+{name:'Supreme Duelist',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/89y87hws259o2ah/com.Neurononfire.SupremeDuelist-581_arm64-v8a.xapk/file'},
+{name:'PSX Android',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/xcztpibu68i1lq1/com.scee.psxandroid-26100001.apk/file'},
+{name:'DOOM',sub:'APK · MediaFire',url:'https://www.mediafire.com/file/dm2f5plxvbdvnei/DOOM.apk/file'},
+{name:'Pong',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/nd2tsow9d5mn687/net.bubik.pong-400017_arm64-v8a.xapk/file'},
+{name:'Tapper',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/atukv7lp4cpcdz4/Tapper.xapk/file'},
+{name:'The Backrooms',sub:'XAPK · MediaFire',url:'https://www.mediafire.com/file/nuumlohhd159brp/TheBackRoom.xapk/file'}
 ];
-const ps1Projects=[
- {name:'PS1 Pong',icon:'vscode',sub:'Pesquisa de código',url:'https://github.com/search?q=PS1%20Pong&type=repositories'},
- {name:'PS1 Flappy Bird',icon:'vscode',sub:'Pesquisa de projeto',url:'https://github.com/search?q=PS1%20Flappy%20Bird&type=repositories'},
- {name:'PSX Tapper',icon:'vscode',sub:'Pesquisa de código',url:'https://github.com/search?q=psx_tapper&type=repositories'},
- {name:'Nortis / Notris',icon:'vscode',sub:'Pesquisa de projeto',url:'https://github.com/search?q=Nortis%20PS1&type=repositories'},
- {name:'Loonies 8192',icon:'vscode',sub:'Pesquisa de projeto',url:'https://github.com/search?q=Loonies%208192%20PS1&type=repositories'},
- {name:'Snake para PS1',icon:'vscode',sub:'Pesquisa de projeto',url:'https://github.com/search?q=PlayStation%201%20Snake%20homebrew&type=repositories'},
- {name:'Sonic the Hedgehog XA',icon:'vscode',sub:'Pesquisa de projeto',url:'https://github.com/search?q=Sonic%20XA%20PS1&type=repositories'},
- {name:'Celeste Classic PS1',icon:'vscode',sub:'Verificar se existe port',url:'https://github.com/search?q=Celeste%20Classic%20PS1&type=repositories'},
- {name:'QuakePSX',icon:'steam',sub:'Pesquisa de código',url:'https://github.com/search?q=QuakePSX&type=repositories'},
- {name:'Tiny Backrooms',icon:'earth',sub:'Pesquisa de projeto',url:'https://github.com/search?q=Tiny%20Backrooms%20PS1&type=repositories'},
- {name:'Open-Ribbon',icon:'vscode',sub:'Pesquisa de código',url:'https://github.com/search?q=Open-Ribbon&type=repositories'},
- {name:'PsyDoom',icon:'epic',sub:'Port de DOOM · PC',url:'https://github.com/search?q=PsyDoom&type=repositories'},
- {name:'Silent Hill (descomp.)',icon:'earth',sub:'Pesquisa de descompilação',url:'https://github.com/search?q=Silent%20Hill%20decompilation&type=repositories'},
- {name:'OpenBiohazard2',icon:'earth',sub:'Projeto relacionado a RE2',url:'https://github.com/search?q=OpenBiohazard2&type=repositories'},
- {name:'MediEvil Recomp',icon:'steam',sub:'Pesquisa de recompilação',url:'https://github.com/search?q=MediEvil%20Recomp&type=repositories'},
- {name:'Crash Bandicoot',icon:'steam',sub:'Pesquisa de código',url:'https://github.com/search?q=Crash%20Bandicoot%20decompilation&type=repositories'},
- {name:'Spyro the Dragon',icon:'steam',sub:'Pesquisa de código',url:'https://github.com/search?q=Spyro%20the%20Dragon%20decompilation&type=repositories'},
- {name:'Frogger PS1',icon:'vscode',sub:'Pesquisa de código',url:'https://github.com/search?q=Frogger%20PS1%20decompilation&type=repositories'},
- {name:'Mega Man X4',icon:'steam',sub:'Pesquisa de código',url:'https://github.com/search?q=Mega%20Man%20X4%20decompilation&type=repositories'},
- {name:'PS1 Bare Metal',icon:'vscode',sub:'Demos e homebrew',url:'https://github.com/search?q=PS1%20bare%20metal%20homebrew&type=repositories'}
-];
-let activeProfileApp=null;
-function makeCard(app){
- const entry=document.createElement('div');entry.className='app-entry';
- const b=document.createElement('button');b.className='app-card';
- const iconMarkup=icons[app.icon]||'<span style="font-size:23px;font-weight:900;color:var(--bright)">'+escapeHtml(app.badge||'X1')+'</span>';
- b.innerHTML='<span class="app-icon">'+iconMarkup+'</span><span class="app-name">'+escapeHtml(app.name)+'</span>'+(app.sub?'<small class="app-meta">'+escapeHtml(app.sub)+'</small>':'');
- b.setAttribute('aria-label',app.name+(app.sub?' — '+app.sub:''));
- b.addEventListener('click',()=>{
-  if(app.packageName){
-   let launched=false;try{launched=!!(window.X1&&window.X1.launchApp(app.packageName));}catch(e){}
-   if(launched){recordRecent(app);toast('Abrindo '+app.name+'…');}
-   else toast('Não foi possível abrir '+app.name+'. Talvez o app tenha sido desinstalado.');
-   return;
-  }
-  if(app.url){
-   let opened=false;try{opened=!!(window.X1&&window.X1.openExternal(app.url));}catch(e){}
-   if(!opened){try{window.location.href=app.url;}catch(e){toast('Não foi possível abrir o link.');}}
-  }else toast(app.name+': ainda não há integração de execução para este programa.');
- });
- entry.appendChild(b);
- if(app.packageName){
-  const gear=document.createElement('button');gear.className='gear-btn';gear.type='button';gear.textContent='⚙';gear.setAttribute('aria-label','Configurações de '+app.name);
-  gear.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();openProfile(app);});entry.appendChild(gear);
- }
- return entry;
-}
-function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-function renderRail(id,apps){const rail=document.getElementById(id);rail.innerHTML='';apps.forEach(app=>rail.appendChild(makeCard(app)));}
-function readRecent(){try{return JSON.parse(localStorage.getItem('x1RecentApps')||'[]');}catch(e){return [];}}
-function recordRecent(app){if(!app.packageName)return;const recent=readRecent().filter(x=>x.packageName!==app.packageName);recent.unshift({name:app.name,packageName:app.packageName,icon:app.icon||'',badge:(app.name||'X').trim().charAt(0),sub:'Aberto recentemente'});try{localStorage.setItem('x1RecentApps',JSON.stringify(recent.slice(0,12)));}catch(e){}renderRail('recentRail',readRecent());}
-function clearRecent(){try{localStorage.removeItem('x1RecentApps');}catch(e){}renderRail('recentRail',[]);toast('Histórico limpo.');}
-function refreshInstalled(){
- const rail=document.getElementById('installedRail');rail.innerHTML='<p class="catalog-note">Lendo os aplicativos instalados...</p>';
- try{
-  if(!window.X1||!window.X1.getInstalledApps){rail.innerHTML='<p class="catalog-note">Esta versão não oferece acesso à lista de apps do Android.</p>';return;}
-  const installed=JSON.parse(window.X1.getInstalledApps()||'[]');
-  if(!installed.length){rail.innerHTML='<p class="catalog-note">Nenhum app instalado e iniciável foi encontrado.</p>';return;}
-  const normalized=installed.map(a=>({name:a.name,packageName:a.packageName,sub:a.isGame?'Jogo instalado':'App instalado',badge:(a.name||'X').trim().charAt(0).toUpperCase(),icon:a.isGame?'roblox':'earth'}));
-  renderRail('installedRail',normalized);
- }catch(e){rail.innerHTML='<p class="catalog-note">Não foi possível ler a lista de apps. Reabra o X1 e tente atualizar.</p>';}
-}
-function loadRecent(){renderRail('recentRail',readRecent());}
-function openProfile(app){
- activeProfileApp=app;document.getElementById('profileAppName').textContent=app.name+' · '+app.packageName;
- let profiles={};try{profiles=JSON.parse(localStorage.getItem('x1Profiles')||'{}');}catch(e){}
- const p=profiles[app.packageName]||{preset:'Performance',resolution:'1080p'};
- document.getElementById('profilePreset').value=p.preset;document.getElementById('profileResolution').value=p.resolution;openModal('profileModal');
-}
-function saveProfile(){
- if(!activeProfileApp)return;
- let profiles={};try{profiles=JSON.parse(localStorage.getItem('x1Profiles')||'{}');}catch(e){}
- const preset=document.getElementById('profilePreset').value,resolution=document.getElementById('profileResolution').value;
- profiles[activeProfileApp.packageName]={preset,resolution,updatedAt:Date.now()};
- try{localStorage.setItem('x1Profiles',JSON.stringify(profiles));}catch(e){}
- closeModal('profileModal');toast('Preferências de '+activeProfileApp.name+' salvas. O Android pode não aplicar gráficos/resolução automaticamente.');
-}
-
-function scrollRail(id,dir){document.getElementById(id).scrollBy({left:dir*360,behavior:document.body.classList.contains('no-motion')?'auto':'smooth'});}
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-function backdropClose(e,id){if(e.target.id===id)closeModal(id);}
-function openAll(which){
- const catalogues={ports:{list:ports,title:'Ports e Apps para Testar'},recent:{list:readRecent(),title:'Jogos abertos recentemente'}};
- const selected=catalogues[which]||catalogues.ports;const title=document.getElementById('allTitle');title.textContent=selected.title;
- const grid=document.getElementById('allGrid');grid.innerHTML='';selected.list.forEach(app=>grid.appendChild(makeCard(app)));openModal('allModal');
-}
-let toastTimer;function toast(message){const el=document.getElementById('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2700);}
-function applyGlow(value){document.documentElement.style.setProperty('--line',`rgba(168,85,247,${0.15+value/130})`);document.documentElement.style.setProperty('--glow',`0 0 ${Math.round(value/3)}px rgba(168,85,247,${value/400})`);}
-function loadSettings(){try{const s=JSON.parse(localStorage.getItem('x1Settings')||'{}');document.getElementById('motionToggle').checked=s.motion!==false;document.getElementById('glowRange').value=s.glow||70;document.getElementById('homeToggle').checked=s.labels!==false;document.body.classList.toggle('no-motion',s.motion===false);document.body.classList.toggle('labels-hidden',s.labels===false);applyGlow(Number(s.glow||70));}catch(e){}}
-function saveSettings(){const s={motion:document.getElementById('motionToggle').checked,glow:Number(document.getElementById('glowRange').value),labels:document.getElementById('homeToggle').checked};try{localStorage.setItem('x1Settings',JSON.stringify(s));}catch(e){}document.body.classList.toggle('no-motion',!s.motion);document.body.classList.toggle('labels-hidden',!s.labels);applyGlow(s.glow);closeModal('settingsModal');toast('Preferências aplicadas.');}
-function resetSettings(){document.getElementById('motionToggle').checked=true;document.getElementById('glowRange').value=70;document.getElementById('homeToggle').checked=true;saveSettings();}
-document.getElementById('glowRange').addEventListener('input',e=>applyGlow(Number(e.target.value)));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open'));});
-renderRail('portsRail',ports);loadSettings();loadRecent();refreshInstalled();
-// A porcentagem cobre as etapas de preparação desta interface, não o carregamento de programas externos.
-const stages=[{p:16,t:'Inicializando interface...'}, {p:38,t:'Preparando ícones...'}, {p:64,t:'Organizando aplicativos...'}, {p:86,t:'Aplicando tema violeta...'}, {p:100,t:'Launcher pronto'}];let stage=0;function advanceLoad(){const s=stages[stage];document.getElementById('percent').textContent=s.p+'%';document.getElementById('loaderRing').style.background=`conic-gradient(var(--bright) 0deg ${s.p*3.6}deg,rgba(168,85,247,.14) ${s.p*3.6}deg 360deg)`;document.getElementById('loadingText').textContent=s.t;stage++;if(stage<stages.length){setTimeout(advanceLoad,stage===1?260:stage===2?320:stage===3?300:300);}else{setTimeout(()=>document.getElementById('loading').classList.add('done'),260);}}setTimeout(advanceLoad,170);
+let activeProfile=null;
+const $=id=>document.getElementById(id);
+function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),2600)}
+function safeRead(key,fallback){try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch(_){return fallback}}
+function appIcon(app){if(app.iconData&&String(app.iconData).startsWith('data:image/')){const img=document.createElement('img');img.src=app.iconData;img.alt='';return img;}const span=document.createElement('span');if(app.catalog){span.className='planet';span.textContent='🪐';}else{span.className='letter';span.textContent=(app.name||'X').trim().slice(0,1).toUpperCase();}return span}
+function makeCard(app){const card=document.createElement('div');card.className='app-card';const button=document.createElement('button');button.type='button';button.className='app-card';button.setAttribute('aria-label',app.name||'Aplicativo');const icon=document.createElement('span');icon.className='iconbox';icon.appendChild(appIcon(app));button.appendChild(icon);const name=document.createElement('span');name.className='app-name';name.textContent=app.name||'App';button.appendChild(name);if(app.sub){const sub=document.createElement('small');sub.className='app-sub';sub.textContent=app.sub;button.appendChild(sub)}button.addEventListener('click',()=>{if(app.packageName){let ok=false;try{ok=!!(window.X1&&window.X1.launchApp(app.packageName))}catch(_){}if(ok){recordRecent(app);toast('Abrindo '+app.name+'…')}else toast('Não foi possível abrir '+app.name+'.')}else if(app.url){let ok=false;try{ok=!!(window.X1&&window.X1.openExternal(app.url))}catch(_){}if(!ok){try{window.location.href=app.url}catch(_){toast('Não foi possível abrir o link.')}}}});card.appendChild(button);if(app.packageName){const gear=document.createElement('button');gear.type='button';gear.className='gear';gear.textContent='⚙';gear.setAttribute('aria-label','Perfil de '+app.name);gear.addEventListener('click',e=>{e.stopPropagation();openProfile(app)});card.appendChild(gear)}return card}
+function renderRail(id,list){const node=$(id);node.replaceChildren();if(!list.length){const e=document.createElement('div');e.className='empty';e.textContent=id==='recentRail'?'Você ainda não abriu apps pelo X1.':'Nenhum aplicativo foi encontrado.';node.appendChild(e);return}list.forEach(app=>node.appendChild(makeCard(app)))}
+function recordRecent(app){const list=safeRead('x1RecentApps',[]).filter(x=>x.packageName!==app.packageName);list.unshift({name:app.name,packageName:app.packageName,iconData:app.iconData||'',sub:'Aberto recentemente'});try{localStorage.setItem('x1RecentApps',JSON.stringify(list.slice(0,10)))}catch(_){}renderRail('recentRail',safeRead('x1RecentApps',[]))}
+function refreshInstalled(){const rail=$('installedRail');rail.replaceChildren();const loading=document.createElement('div');loading.className='empty';loading.textContent='Lendo aplicativos instalados...';rail.appendChild(loading);setTimeout(()=>{try{if(!window.X1||!window.X1.getInstalledApps){renderRail('installedRail',[]);toast('Esta versão não expõe a lista de apps Android.');return}const apps=JSON.parse(window.X1.getInstalledApps()||'[]').map(a=>({name:a.name,packageName:a.packageName,iconData:a.iconData||'',isGame:!!a.isGame,sub:a.isGame?'Jogo instalado':'App instalado'}));renderRail('installedRail',apps)}catch(e){renderRail('installedRail',[]);toast('Erro ao carregar os aplicativos.')}} ,0)}
+function renderPorts(){renderRail('portsRail',ports.map(p=>({...p,catalog:true})));$('allPortsGrid').replaceChildren();ports.forEach(p=>$('allPortsGrid').appendChild(makeCard({...p,catalog:true})))}
+function openProfile(app){activeProfile=app;$('profileAppName').textContent=app.name+' · '+app.packageName;const all=safeRead('x1Profiles',{}),p=all[app.packageName]||{preset:'Performance',resolution:'1080p'};$('profilePreset').value=p.preset;$('profileResolution').value=p.resolution;$('profileModal').classList.add('open')}
+function saveProfile(){if(!activeProfile)return;const p=safeRead('x1Profiles',{});p[activeProfile.packageName]={preset:$('profilePreset').value,resolution:$('profileResolution').value};try{localStorage.setItem('x1Profiles',JSON.stringify(p))}catch(_){}closeModal('profileModal');toast('Preferências salvas para '+activeProfile.name+'.')}
+function closeModal(id){$(id).classList.remove('open')}
+function setWallpaper(data,save=true){document.body.style.backgroundImage='linear-gradient(rgba(8,6,15,.76),rgba(8,6,15,.9)),url("'+data+'")';document.body.style.backgroundSize='cover';document.body.style.backgroundPosition='center';if(save){try{localStorage.setItem('x1Wallpaper',JSON.stringify(data))}catch(_){toast('Imagem grande demais para salvar; use uma imagem menor.')}}}
+function loadSettings(){const s=safeRead('x1Settings',{});$('motionToggle').checked=s.motion!==false;$('glowRange').value=s.glow||70;$('labelsToggle').checked=s.labels!==false;applySettings();let wall='';try{wall=JSON.parse(localStorage.getItem('x1Wallpaper')||'""')}catch(_){}if(wall)setWallpaper(wall,false)}
+function applySettings(){const s={motion:$('motionToggle').checked,glow:Number($('glowRange').value),labels:$('labelsToggle').checked};document.body.classList.toggle('no-motion',!s.motion);document.body.classList.toggle('labels-hidden',!s.labels);document.documentElement.style.setProperty('--line','rgba(168,85,247,'+(0.12+s.glow/180)+')');document.documentElement.style.setProperty('--glow','0 0 '+Math.round(s.glow/3)+'px rgba(168,85,247,'+(s.glow/500)+')')}
+function saveSettings(){const s={motion:$('motionToggle').checked,glow:Number($('glowRange').value),labels:$('labelsToggle').checked};try{localStorage.setItem('x1Settings',JSON.stringify(s))}catch(_){}applySettings();closeModal('settingsModal');toast('Configurações salvas.')}
+function resetSettings(){try{localStorage.removeItem('x1Settings');localStorage.removeItem('x1Wallpaper')}catch(_){}document.body.style.backgroundImage='';document.body.style.backgroundSize='';$('motionToggle').checked=true;$('glowRange').value=70;$('labelsToggle').checked=true;applySettings();toast('Aparência restaurada.');}
+function chooseWallpaper(file){if(!file)return;const reader=new FileReader();reader.onload=()=>{const image=new Image();image.onload=()=>{const canvas=document.createElement('canvas');const scale=Math.min(1,1200/Math.max(image.width,image.height));canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);canvas.getContext('2d').drawImage(image,0,0,canvas.width,canvas.height);setWallpaper(canvas.toDataURL('image/jpeg',.78));toast('Papel de parede atualizado.')} ;image.onerror=()=>toast('Não foi possível abrir essa imagem.');image.src=reader.result};reader.onerror=()=>toast('Não foi possível ler a imagem.');reader.readAsDataURL(file)}
+$('clearRecent').addEventListener('click',()=>{try{localStorage.removeItem('x1RecentApps')}catch(_){}renderRail('recentRail',[]);toast('Histórico apagado.')});$('refreshInstalled').addEventListener('click',refreshInstalled);$('viewPorts').addEventListener('click',()=>$('allPortsModal').classList.add('open'));$('openSettings').addEventListener('click',()=>$('settingsModal').classList.add('open'));document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>closeModal(b.dataset.close)));document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop.open').forEach(close=>close.classList.remove('open'))});$('saveProfile').addEventListener('click',saveProfile);$('saveSettings').addEventListener('click',saveSettings);$('resetSettings').addEventListener('click',resetSettings);$('chooseWallpaper').addEventListener('click',()=>$('wallpaperInput').click());$('wallpaperInput').addEventListener('change',e=>chooseWallpaper(e.target.files&&e.target.files[0]));$('glowRange').addEventListener('input',applySettings);
+function initialize(){try{renderPorts();renderRail('recentRail',safeRead('x1RecentApps',[]));loadSettings();refreshInstalled()}catch(e){console.error('X1 initialization failed',e);toast('A interface carregou com limitações.')}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 </script>
 </body></html>
