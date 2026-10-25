@@ -92,6 +92,14 @@ class AdbPairingReceiver : BroadcastReceiver() {
             return
         }
 
+        // Keep the UI state after the app is closed/reopened. This marks pairing,
+        // not a continuously active shell connection.
+        context.getSharedPreferences("x1_adb_pairing_state", Context.MODE_PRIVATE).edit()
+            .putBoolean("paired", true)
+            .putString("host", pairHost)
+            .putLong("pairedAt", System.currentTimeMillis())
+            .apply()
+
         showStatus(context, "Pareamento concluído", "Código aceito. Procurando a porta de conexão ADB…", false)
         val connectService = discoverService(context, CONNECT_SERVICE_TYPE, 10_000L)
         val connectHost = connectService?.host?.hostAddress?.substringBefore("%")

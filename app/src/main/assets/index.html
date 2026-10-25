@@ -35,6 +35,11 @@
 
 /* ADB wireless pairing controls */
 .adb-pair-panel{margin-top:12px;padding:13px;border:1px solid rgba(168,85,247,.32);border-radius:14px;background:rgba(7,5,13,.72)}
+.adb-paired-banner{margin-top:12px;padding:15px;border:1px solid rgba(34,197,94,.65);border-radius:14px;background:linear-gradient(125deg,rgba(20,83,45,.42),rgba(6,25,17,.92));color:#dcfce7;box-shadow:0 0 18px rgba(34,197,94,.10)}
+.adb-paired-banner[hidden],.adb-pair-panel[hidden]{display:none!important}
+.adb-paired-banner strong{display:block;font-size:15px;color:#86efac}
+.adb-paired-banner p{font-size:12px;line-height:1.5;margin:8px 0 12px;color:#d1fae5}
+.adb-paired-banner button{width:100%;min-height:42px;border:1px solid rgba(74,222,128,.42);border-radius:10px;background:rgba(20,83,45,.35);color:#dcfce7;font-weight:700}
 .adb-label{display:block;margin:10px 0 5px;color:#e8d9ff;font-size:12px;font-weight:700}
 .adb-input{box-sizing:border-box;width:100%;min-height:44px;padding:10px 12px;border:1px solid rgba(168,85,247,.42);border-radius:10px;background:#0d0915;color:#fff;font-size:14px;outline:none}
 .adb-input:focus{border-color:#b68aff;box-shadow:0 0 0 2px rgba(168,85,247,.16)}
@@ -61,6 +66,11 @@
 <section id="systemPage" class="page" aria-label="X1 System">
   <div class="system-hero"><h2>⚙ X1 System</h2><p>Diagnóstico do aparelho e atalhos reais do Android. Os dados são consultados quando esta página é aberta; recursos não expostos pelo Android aparecem como indisponíveis.</p><button type="button" class="system-back" id="systemBackToApps">← Voltar para X1 Apps</button></div>
   <div class="system-group"><h3>Depuração sem fio</h3><div class="system-status" id="wirelessStatus">O X1 pode receber o código pela notificação e descobrir as portas ADB por mDNS, sem preenchê-las manualmente. Ative Depuração sem fio no Android 11+.</div>
+    <div class="adb-paired-banner" id="adbPairedBanner" hidden role="status" aria-live="polite">
+      <strong>✓ Pareamento ADB ativado</strong>
+      <p id="adbPairedDescription">O X1 salvou o estado do pareamento neste aplicativo.</p>
+      <button type="button" id="adbForgetPairingButton">Configurar pareamento novamente</button>
+    </div>
     <div class="adb-pair-panel" id="adbPairPanel">
       <p class="note">Ative a Depuração sem fio no Android. O modo automático permite responder ao aviso do X1 com o código de 6 dígitos, sem preencher IP ou portas.</p>
       <button type="button" class="primary" id="adbNotifyPairButton">Parear pela notificação (sem IP/porta)</button>
@@ -165,15 +175,38 @@ document.querySelectorAll("[data-x1page]").forEach(btn=>btn.addEventListener("cl
 $("refreshSystemMetrics").addEventListener("click",refreshSystemPage);
 $("openWirelessDebugging").addEventListener("click",()=>{try{if(window.X1&&window.X1.openDeveloperSettings&&window.X1.openDeveloperSettings()){$("wirelessStatus").textContent="Opções do desenvolvedor abertas. Na tela do Android, habilite Depuração sem fio e use o pareamento oferecido pelo próprio sistema."}else toast("Não foi possível abrir as opções do desenvolvedor.")}catch(_){toast("Não foi possível abrir as opções do desenvolvedor.")}});
 $("adbNotifyPairButton").addEventListener("click",()=>{if(!window.X1||!window.X1.startAutomaticAdbPairing){toast("Recurso disponível no APK Android atualizado.");return}try{$("wirelessStatus").textContent="Preparando notificação de pareamento…";window.X1.startAutomaticAdbPairing()}catch(_){toast("Não foi possível preparar a notificação.")}});
-$("adbPairButton").addEventListener("click",adbPairRequest);$("adbConnectButton").addEventListener("click",adbConnectRequest);
+$("adbPairButton").addEventListener("click",adbPairRequest);$("adbConnectButton").addEventListener("click",adbConnectRequest);$("adbForgetPairingButton").addEventListener("click",adbForgetPairingState);
 $("wirelessHelp").addEventListener("click",()=>{$("wirelessStatus").textContent="1) Ative Depuração sem fio. 2) Toque em Parear dispositivo com código e mantenha a janela aberta. 3) No X1, toque em Parear pela notificação. 4) Responda ao aviso do X1 com o código de 6 dígitos. O X1 tentará descobrir automaticamente IP e portas via mDNS. Se o Android não anunciar o serviço, abra Configuração manual / avançada.";});
 $("systemBackToApps").addEventListener("click",()=>x1PageChange("appsPage"));
 function setAdbBusy(busy){$('adbPairButton').disabled=busy;$('adbConnectButton').disabled=busy;}
-window.onX1AdbPairResult=function(success,message,connected){setAdbBusy(false);const el=$('wirelessStatus');el.textContent=(success?'✓ ':'✕ ')+message+(connected?' Estado: conectado.':'');el.style.color=success?'#d7ffd9':'#ffd0dc';if(!success)toast(message)};
+function renderAdbPairingState(state){
+ const paired=!!(state&&state.paired);
+ $('adbPairedBanner').hidden=!paired;
+ $('adbPairPanel').hidden=paired;
+ if(!paired){$('wirelessStatus').style.color='';return;}
+ const host=String(state.host||'').trim();
+ $('adbPairedDescription').textContent=(host?'O pareamento deste dispositivo ('+host+') foi salvo no X1. ':'O pareamento foi salvo no X1. ')+ 'Esse estado permanece ao sair e voltar ao aplicativo. A conexão ADB ativa pode precisar ser refeita se a Depuração sem fio for desligada ou o Android reiniciar.';
+ $('wirelessStatus').textContent='✓ Pareamento ADB salvo neste aplicativo.'+(host?' Dispositivo: '+host+'.':'')+' O estado da conexão ativa é separado.';
+ $('wirelessStatus').style.color='#86efac';
+}
+window.x1RefreshAdbPairingState=function(){
+ try{if(!window.X1||!window.X1.getAdbPairingState)return;renderAdbPairingState(JSON.parse(window.X1.getAdbPairingState()||'{}'));}
+ catch(e){console.warn('Não foi possível consultar o estado do pareamento ADB.',e);}
+};
+function adbForgetPairingState(){
+ try{
+  if(!window.X1||!window.X1.forgetAdbPairingState){toast('Atualize o APK para alterar o estado do pareamento.');return;}
+  window.X1.forgetAdbPairingState();
+  renderAdbPairingState({paired:false});
+  $('wirelessStatus').textContent='Estado local do pareamento removido. Isso não revoga a autorização ADB nas configurações do Android.';
+  toast('Estado salvo removido.');
+ }catch(e){toast('Não foi possível alterar o estado salvo.');}
+}
+window.onX1AdbPairResult=function(success,message,connected){setAdbBusy(false);const el=$('wirelessStatus');el.textContent=(success?'✓ ':'✕ ')+message+(connected?' Estado: conectado.':'');el.style.color=success?'#d7ffd9':'#ffd0dc';if(success&&window.x1RefreshAdbPairingState)window.x1RefreshAdbPairingState();if(!success)toast(message)};
 function adbPairRequest(){const host=$('adbHost').value.trim();const pairPort=Number($('adbPairPort').value);const code=$('adbPairCode').value.trim();const connectPort=Number($('adbConnectPort').value||0);if(!host||!pairPort||!/^[0-9]{6}$/.test(code)){toast('Preencha IP, porta de pareamento e código de 6 dígitos.');return}if(!window.X1||!window.X1.pairWirelessDebugging){toast('Este APK não expõe a integração ADB. Instale o APK gerado após esta correção.');return}setAdbBusy(true);$('wirelessStatus').textContent='Tentando parear com '+host+':'+pairPort+'…';try{window.X1.pairWirelessDebugging(host,pairPort,code,connectPort)}catch(e){setAdbBusy(false);toast('Não foi possível iniciar o pareamento ADB.');$('wirelessStatus').textContent='Falha ao iniciar o pareamento.'}}
 function adbConnectRequest(){const host=$('adbHost').value.trim();const port=Number($('adbConnectPort').value);if(!host||!port){toast('Preencha IP e porta de conexão.');return}if(!window.X1||!window.X1.connectWirelessDebugging){toast('Este APK não expõe a integração ADB. Instale o APK gerado após esta correção.');return}setAdbBusy(true);$('wirelessStatus').textContent='Conectando ao dispositivo já pareado…';try{window.X1.connectWirelessDebugging(host,port)}catch(e){setAdbBusy(false);toast('Não foi possível iniciar a conexão ADB.');$('wirelessStatus').textContent='Falha ao iniciar a conexão.'}}
 
-function initialize(){try{renderPorts();renderRail('recentRail',safeRead('x1RecentApps',[]));loadSettings();refreshInstalled()}catch(e){console.error('X1 initialization failed',e);toast('A interface carregou com limitações.')}}
+function initialize(){try{renderPorts();renderRail('recentRail',safeRead('x1RecentApps',[]));loadSettings();refreshInstalled();if(window.x1RefreshAdbPairingState)window.x1RefreshAdbPairingState()}catch(e){console.error('X1 initialization failed',e);toast('A interface carregou com limitações.')}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 </script>
 </body></html>

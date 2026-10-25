@@ -65,6 +65,34 @@ class MainActivity : Activity() {
         return FileKeyProvider(File(keyDirectory, "adbkey"))
     }
 
+    private fun adbPairingPreferences(): android.content.SharedPreferences =
+        getSharedPreferences("x1_adb_pairing_state", MODE_PRIVATE)
+
+    private fun saveAdbPairingState(host: String) {
+        adbPairingPreferences().edit()
+            .putBoolean("paired", true)
+            .putString("host", host)
+            .putLong("pairedAt", System.currentTimeMillis())
+            .apply()
+    }
+
+    private fun adbPairingStateJson(): String {
+        val prefs = adbPairingPreferences()
+        return JSONObject()
+            .put("paired", prefs.getBoolean("paired", false))
+            .put("host", prefs.getString("host", "") ?: "")
+            .put("pairedAt", prefs.getLong("pairedAt", 0L))
+            .toString()
+    }
+
+    private fun clearAdbPairingState() {
+        adbPairingPreferences().edit()
+            .putBoolean("paired", false)
+            .remove("host")
+            .remove("pairedAt")
+            .apply()
+    }
+
     private fun startAdbOperation(task: suspend () -> AdbUiResult) {
         if (!adbOperationActive.compareAndSet(false, true)) {
             reportAdbPairResult(false, "Uma operação ADB já está em andamento. Aguarde terminar.", false)
@@ -467,6 +495,15 @@ class MainActivity : Activity() {
         fun getSystemInfo(): String = systemInfoJson()
 
         @JavascriptInterface
+        fun getAdbPairingState(): String = adbPairingStateJson()
+
+        @JavascriptInterface
+        fun forgetAdbPairingState(): Boolean {
+            clearAdbPairingState()
+            return true
+        }
+
+        @JavascriptInterface
         fun startAutomaticAdbPairing() {
             runOnUiThread { startAutomaticAdbPairingNotification() }
         }
@@ -501,6 +538,9 @@ class MainActivity : Activity() {
                     )
                 }
 
+                // Persist only the pairing state. A successful pairing does not mean
+                // that an active ADB shell connection will survive leaving the screen.
+                saveAdbPairingState(host)
                 var message = "Pareamento ADB concluído."
                 var connected = false
 
@@ -557,6 +597,7 @@ class MainActivity : Activity() {
                         "A conexão foi aberta, mas o teste ADB falhou: ${shellResult.stderrText.trim().take(120).ifBlank { "comando recusado" }}."
                     )
                 } else {
+                    saveAdbPairingState(host)
                     val model = shellResult.stdoutText.trim()
                     AdbUiResult(
                         true,
@@ -641,6 +682,7 @@ class MainActivity : Activity() {
         super.onResume()
         if (::webView.isInitialized) {
             webView.evaluateJavascript("window.x1RefreshAdvanced && window.x1RefreshAdvanced();", null)
+            webView.evaluateJavascript("window.x1RefreshAdbPairingState && window.x1RefreshAdbPairingState();", null)
         }
     }
 
