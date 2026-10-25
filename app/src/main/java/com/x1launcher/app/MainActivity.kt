@@ -15,6 +15,7 @@ import android.os.Process
 import android.os.StatFs
 import android.provider.Settings
 import android.os.Build
+import android.os.BatteryManager
 import android.os.Bundle
 import android.util.Base64
 import android.webkit.JavascriptInterface
@@ -236,6 +237,33 @@ class MainActivity : Activity() {
         }
     }
 
+
+    private fun systemInfoJson(): String {
+        val cpu = try {
+            if (Build.VERSION.SDK_INT >= 31 && Build.SOC_MODEL.isNotBlank()) Build.SOC_MODEL
+            else java.io.File("/proc/cpuinfo").useLines { lines ->
+                lines.firstOrNull { it.startsWith("model name", true) || it.startsWith("Hardware", true) || it.startsWith("Processor", true) }
+                    ?.substringAfter(":")?.trim()
+            } ?: Build.HARDWARE
+        } catch (_: Exception) { Build.HARDWARE }
+        val temperature = try {
+            val battery = registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val raw = battery?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1) ?: -1
+            if (raw >= 0) raw / 10.0 else null
+        } catch (_: Exception) { null }
+        return JSONObject()
+            .put("manufacturer", Build.MANUFACTURER)
+            .put("model", Build.MODEL)
+            .put("device", Build.DEVICE)
+            .put("android", Build.VERSION.RELEASE)
+            .put("sdk", Build.VERSION.SDK_INT)
+            .put("cpu", cpu)
+            .put("hardware", Build.HARDWARE)
+            .put("abi", Build.SUPPORTED_ABIS.firstOrNull() ?: "desconhecida")
+            .put("batteryTempC", temperature ?: JSONObject.NULL)
+            .toString()
+    }
+
     private fun probeRootAccess(): Pair<Boolean, String> {
         var process: java.lang.Process? = null
         return try {
@@ -279,6 +307,19 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun getDeviceStats(): String = deviceStatsJson()
+
+        @JavascriptInterface
+        fun getSystemInfo(): String = systemInfoJson()
+
+        @JavascriptInterface
+        fun openDeveloperSettings(): Boolean {
+            return try {
+                startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                true
+            } catch (_: Exception) {
+                false
+            }
+        }
 
         @JavascriptInterface
         fun hasUsageAccess(): Boolean = hasUsageAccessNow()
