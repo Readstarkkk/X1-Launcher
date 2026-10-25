@@ -27,13 +27,18 @@
 .system-status{border:1px solid rgba(168,85,247,.24);border-radius:13px;background:rgba(5,4,10,.6);padding:12px;color:var(--muted);font-size:11px;line-height:1.55}
 @media(min-width:650px){.x1-cover-banner{min-height:160px}.x1-cover-banner img{height:180px}.system-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.system-actions{grid-template-columns:1fr 1fr}}
 
+
+/* Correção de navegação: abas sempre acessíveis ao rolar a página */
+.x1-tabs{position:sticky;top:0;z-index:25;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding-top:6px;padding-bottom:6px;background:rgba(8,6,15,.94)}
+.system-back{display:inline-flex;align-items:center;justify-content:center;margin-top:12px;min-height:42px;padding:9px 13px;border:1px solid rgba(168,85,247,.55);border-radius:11px;background:rgba(109,40,217,.18);color:#f8f4ff;font-weight:750;font-size:12px}
+
 </style>
 </head>
 <body>
 <div id="loading" aria-live="polite"><img class="splash-cover" src="x1-cover.jpg" alt="Capa X1"><div class="ring" id="splashRing"><span id="splashPercent">0%</span></div><div class="splash-text" id="splashText">Iniciando X1 Launcher...</div><div class="splash-sub">Preparando interface</div></div>
 <script id="x1SplashFailsafe">
 /* Proteção independente: a splash some mesmo se o script principal tiver erro. */
-(function(){var start=Date.now(),done=false;function hide(){if(done)return;done=true;var el=document.getElementById('loading');if(el)el.classList.add('done');}function tick(){var p=Math.min(100,Math.floor((Date.now()-start)/24));var n=document.getElementById('splashPercent'),r=document.getElementById('splashRing'),t=document.getElementById('splashText');if(n)n.textContent=p+'%';if(r)r.style.background='conic-gradient(var(--bright) 0deg '+(p*3.6)+'deg,rgba(168,85,247,.12) '+(p*3.6)+'deg 360deg)';if(t)t.textContent=p<30?'Inicializando interface...':p<65?'Organizando aplicativos...':p<95?'Aplicando preferências...':'Launcher pronto';if(p>=100){hide();return;}setTimeout(tick,45);}setTimeout(tick,50);setTimeout(hide,4200);})();
+(function(){var start=Date.now(),done=false;function hide(){if(done)return;done=true;var el=document.getElementById('loading');if(el)el.classList.add('done');}function tick(){var p=Math.min(100,Math.floor((Date.now()-start)/24));var n=document.getElementById('splashPercent'),r=document.getElementById('splashRing'),t=document.getElementById('splashText');if(n)n.textContent=p+'%';if(r)r.style.background='conic-gradient(var(--bright) 0deg '+(p*3.6)+'deg,rgba(168,85,247,.12) '+(p*3.6)+'deg 360deg)';if(t)t.textContent=p<30?'Inicializando interface...':p<65?'Organizando aplicativos...':p<95?'Aplicando preferências...':'Launcher pronto';if(p>=100){hide();return;}setTimeout(tick,45);}setTimeout(tick,50);setTimeout(hide,2600);})();
 </script>
 <div class="frame">
 <header><div class="brand"><div class="brand-mark">X1</div><div><div class="brand-title">LAUNCHER</div><div class="brand-sub">SEU ESPAÇO GAMER</div></div></div><div class="status"><i></i>Interface pronta</div></header>
@@ -46,7 +51,10 @@
 <div class="bottom-actions"><button class="primary-tile" id="openSettings"><span class="tile-icon">⚙</span>Configurações</button></div>
 </main>
 <section id="systemPage" class="page" aria-label="X1 System">
-  <div class="system-hero"><h2>⚙ X1 System</h2><p>Diagnóstico do aparelho e atalhos reais do Android. Os dados são consultados quando esta página é aberta; recursos não expostos pelo Android aparecem como indisponíveis.</p></div>
+  <div class="system-hero"><h2>⚙ X1 System</h2><p>Diagnóstico do aparelho e atalhos reais do Android. Os dados são consultados quando esta página é aberta; recursos não expostos pelo Android aparecem como indisponíveis.</p><button type="button" class="system-back" id="systemBackToApps">← Voltar para X1 Apps</button></div>
+  <div class="system-group"><h3>Depuração sem fio</h3><div class="system-status" id="wirelessStatus">O Android controla o estado e o pareamento ADB. O X1 abrirá as opções de desenvolvedor; esta página ainda não mantém uma sessão ADB própria nem afirma que o aparelho está pareado.</div>
+    <div class="button-row"><button class="primary" id="openWirelessDebugging">Abrir opções do desenvolvedor ↗</button><button class="secondary" id="wirelessHelp">Como ativar</button></div>
+  </div>
   <div class="system-group"><h3>Monitoramento</h3><div class="system-grid">
     <div class="system-card"><small>RAM usada / total</small><strong id="systemRamValue">—</strong><p id="systemRamDetail">Consultando Android…</p></div>
     <div class="system-card"><small>Armazenamento livre</small><strong id="systemStorageValue">—</strong><p id="systemStorageDetail">Consultando Android…</p></div>
@@ -57,9 +65,6 @@
     <div class="system-card"><small>CPU / SoC</small><strong id="systemCpuValue">—</strong><p id="systemAbiValue">ABI: —</p></div>
     <div class="system-card"><small>GPU do WebView</small><strong id="systemGpuValue">Consultando…</strong><p>Nome informado pelo mecanismo gráfico do WebView, quando disponibilizado.</p></div>
   </div><div class="button-row"><button class="secondary" id="refreshSystemMetrics">Atualizar diagnóstico ↻</button></div></div>
-  <div class="system-group"><h3>Depuração sem fio</h3><div class="system-status" id="wirelessStatus">O Android controla o estado e o pareamento ADB. O X1 abrirá as opções de desenvolvedor; esta página ainda não mantém uma sessão ADB própria nem afirma que o aparelho está pareado.</div>
-    <div class="button-row"><button class="primary" id="openWirelessDebugging">Abrir opções do desenvolvedor ↗</button><button class="secondary" id="wirelessHelp">Como ativar</button></div>
-  </div>
   <div class="system-group"><h3>Atalhos de otimização</h3><p class="note">Estes botões abrem controles oficiais do sistema para você verificar e alterar as configurações. Não prometem ganho de FPS nem encerram processos escondidos.</p><div class="system-actions">
     <button class="system-action" data-system-setting="battery"><span>🔋 Economia de bateria<small>Abrir o controle de bateria do Android</small></span><span class="arrow">›</span></button>
     <button class="system-action" data-system-setting="storage"><span>💾 Armazenamento<small>Conferir espaço livre e gerenciar arquivos</small></span><span class="arrow">›</span></button>
@@ -138,6 +143,7 @@ document.querySelectorAll("[data-x1page]").forEach(btn=>btn.addEventListener("cl
 $("refreshSystemMetrics").addEventListener("click",refreshSystemPage);
 $("openWirelessDebugging").addEventListener("click",()=>{try{if(window.X1&&window.X1.openDeveloperSettings&&window.X1.openDeveloperSettings()){$("wirelessStatus").textContent="Opções do desenvolvedor abertas. Na tela do Android, habilite Depuração sem fio e use o pareamento oferecido pelo próprio sistema."}else toast("Não foi possível abrir as opções do desenvolvedor.")}catch(_){toast("Não foi possível abrir as opções do desenvolvedor.")}});
 $("wirelessHelp").addEventListener("click",()=>{$("wirelessStatus").textContent="1) Habilite as opções do desenvolvedor no Android. 2) Ative Depuração sem fio. 3) Use Parear dispositivo com código ou QR no próprio Android. O X1 não exibe estado de conexão ADB porque ainda não implementa o protocolo ADB dentro do app.";});
+$("systemBackToApps").addEventListener("click",()=>x1PageChange("appsPage"));
 function initialize(){try{renderPorts();renderRail('recentRail',safeRead('x1RecentApps',[]));loadSettings();refreshInstalled()}catch(e){console.error('X1 initialization failed',e);toast('A interface carregou com limitações.')}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initialize,{once:true});else initialize();
 </script>
