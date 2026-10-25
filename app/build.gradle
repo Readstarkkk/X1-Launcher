@@ -31,5 +31,5 @@ kotlin {
 
 
 dependencies {
-    implementation 'io.github.rhythmcache:adb-kt:1.0.0'
+    implementation 'com.github.rhythmcache:adb-kt:1.0.13'
 }
