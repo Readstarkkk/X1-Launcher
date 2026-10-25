@@ -22,6 +22,8 @@ import android.webkit.JavascriptInterface
 import io.github.rhythmcache.adb.AdbClient
 import io.github.rhythmcache.adb.FileKeyProvider
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
 import java.io.File
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -42,6 +44,46 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val imagePickerRequest = 4317
+    private val adbOperationActive = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    private data class AdbUiResult(
+        val success: Boolean,
+        val message: String,
+        val connected: Boolean = false
+    )
+
+    private fun adbKeyProvider(): FileKeyProvider {
+        val keyDirectory = File(filesDir, "adb").apply { mkdirs() }
+        return FileKeyProvider(File(keyDirectory, "adbkey"))
+    }
+
+    private fun startAdbOperation(task: suspend () -> AdbUiResult) {
+        if (!adbOperationActive.compareAndSet(false, true)) {
+            reportAdbPairResult(false, "Uma operação ADB já está em andamento. Aguarde terminar.", false)
+            return
+        }
+
+        Thread({
+            val result = try {
+                runBlocking {
+                    withTimeout(45_000L) { task() }
+                }
+            } catch (_: TimeoutCancellationException) {
+                AdbUiResult(false, "Tempo esgotado após 45 segundos. Confira IP, portas, Wi-Fi e se a Depuração sem fio continua ativa.")
+            } catch (e: Exception) {
+                val detail = e.message?.take(160)?.takeIf { it.isNotBlank() }
+                AdbUiResult(
+                    false,
+                    "Falha ADB: ${detail ?: e.javaClass.simpleName}. Confira a rede, a porta e o pareamento."
+                )
+            } finally {
+                adbOperationActive.set(false)
+            }
+            runOnUiThread {
+                reportAdbPairResult(result.success, result.message, result.connected)
+            }
+        }, "X1-ADB-operation").start()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -318,71 +360,97 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun pairWirelessDebugging(hostInput: String, pairPort: Int, pairingCode: String, connectPort: Int) {
             val host = hostInput.trim()
-            if (!host.matches(Regex("^[0-9a-fA-F:.]+$")) || host.length > 64 || pairPort !in 1..65535 || !pairingCode.matches(Regex("^[0-9]{6}$")) || (connectPort != 0 && connectPort !in 1..65535)) {
-                runOnUiThread { reportAdbPairResult(false, "Confira o IP, a porta (1–65535) e o código de 6 dígitos.", false) }
+            if (!host.matches(Regex("^[0-9a-fA-F:.]+$")) || host.length > 64 ||
+                pairPort !in 1..65535 ||
+                !pairingCode.matches(Regex("^[0-9]{6}$")) ||
+                (connectPort != 0 && connectPort !in 1..65535)
+            ) {
+                reportAdbPairResult(false, "Confira o IP, a porta de pareamento (1–65535) e o código de 6 dígitos.", false)
                 return
             }
-            Thread {
-                var paired = false
-                var message = ""
-                var connected = false
-                try {
-                    val keyDir = File(filesDir, "adb").apply { mkdirs() }
-                    val keyProvider = FileKeyProvider(File(keyDir, "adbkey"))
-                    val result = runBlocking { AdbClient.pairTls(host, pairPort, pairingCode, keyProvider) }
-                    paired = result.isSuccess
-                    if (!paired) {
-                        message = "O pareamento foi recusado. Confira se o código ainda está válido, o IP/porta de pareamento e se os dois dispositivos estão na mesma rede."
-                    } else {
-                        message = "Pareamento ADB concluído."
-                        if (connectPort in 1..65535) {
-                            try {
-                                val model = runBlocking {
-                                    AdbClient.connectTls(host, connectPort, keyProvider).use { client ->
-                                        client.shell("getprop ro.product.model").stdoutText.trim()
-                                    }
-                                }
-                                connected = true
-                                message += if (model.isNotBlank()) " Conectado: $model." else " Conexão ADB confirmada."
-                            } catch (e: Exception) {
-                                message += " Pareado, mas a conexão não foi concluída. Confirme a porta de conexão exibida na tela principal de Depuração sem fio."
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    message = when {
-                        e.message?.contains("timeout", true) == true -> "Tempo esgotado. Verifique a rede, IP e porta de pareamento."
-                        else -> "Falha no pareamento: ${e.message?.take(180) ?: e.javaClass.simpleName}"
-                    }
+
+            startAdbOperation {
+                val keyProvider = adbKeyProvider()
+                val pairing = AdbClient.pairTls(
+                    host = host,
+                    port = pairPort,
+                    pairingCode = pairingCode,
+                    keyProvider = keyProvider,
+                    connectTimeoutMs = 10_000
+                )
+
+                if (pairing.isFailure) {
+                    val detail = pairing.exceptionOrNull()?.message?.take(120)
+                    return@startAdbOperation AdbUiResult(
+                        false,
+                        "Pareamento recusado ou expirado. Confira o código e a porta de pareamento.${detail?.let { " Detalhe: $it" } ?: ""}"
+                    )
                 }
-                runOnUiThread { reportAdbPairResult(paired, message, connected) }
-            }.start()
+
+                var message = "Pareamento ADB concluído."
+                var connected = false
+
+                if (connectPort in 1..65535) {
+                    try {
+                        val shellResult = AdbClient.connectTls(
+                            host = host,
+                            port = connectPort,
+                            keyProvider = keyProvider,
+                            handshakeTimeoutMs = 20_000L
+                        ).use { client ->
+                            client.shell("getprop ro.product.model")
+                        }
+
+                        if (shellResult.isSuccess) {
+                            connected = true
+                            val model = shellResult.stdoutText.trim()
+                            message += if (model.isNotBlank()) " Conexão confirmada: $model." else " Conexão confirmada."
+                        } else {
+                            message += " O pareamento foi feito, mas o teste ADB falhou: ${shellResult.stderrText.trim().take(100).ifBlank { "comando recusado" }}."
+                        }
+                    } catch (e: Exception) {
+                        message += " O pareamento foi feito, mas não conectou na porta informada. Use a porta de conexão da tela principal de Depuração sem fio. ${e.message?.take(100) ?: ""}"
+                    }
+                } else {
+                    message += " Agora informe a porta de conexão mostrada na tela principal de Depuração sem fio e toque em Conectar."
+                }
+
+                AdbUiResult(true, message, connected)
+            }
         }
 
         @JavascriptInterface
         fun connectWirelessDebugging(hostInput: String, connectPort: Int) {
             val host = hostInput.trim()
             if (!host.matches(Regex("^[0-9a-fA-F:.]+$")) || host.length > 64 || connectPort !in 1..65535) {
-                runOnUiThread { reportAdbPairResult(false, "Informe um IP válido e a porta de conexão (1–65535).", false) }
+                reportAdbPairResult(false, "Informe um IP válido e a porta de conexão (1–65535).", false)
                 return
             }
-            Thread {
-                var connected = false
-                var message = ""
-                try {
-                    val keyProvider = FileKeyProvider(File(File(filesDir, "adb"), "adbkey"))
-                    val model = runBlocking {
-                        AdbClient.connectTls(host, connectPort, keyProvider).use { client ->
-                            client.shell("getprop ro.product.model").stdoutText.trim()
-                        }
-                    }
-                    connected = true
-                    message = if (model.isNotBlank()) "Conectado por ADB: $model." else "Conexão ADB confirmada."
-                } catch (e: Exception) {
-                    message = "Não conectou. Confirme que o pareamento foi feito e use a porta de conexão, não a porta de pareamento."
+
+            startAdbOperation {
+                val shellResult = AdbClient.connectTls(
+                    host = host,
+                    port = connectPort,
+                    keyProvider = adbKeyProvider(),
+                    handshakeTimeoutMs = 20_000L
+                ).use { client ->
+                    client.shell("getprop ro.product.model")
                 }
-                runOnUiThread { reportAdbPairResult(connected, message, connected) }
-            }.start()
+
+                if (!shellResult.isSuccess) {
+                    AdbUiResult(
+                        false,
+                        "A conexão foi aberta, mas o teste ADB falhou: ${shellResult.stderrText.trim().take(120).ifBlank { "comando recusado" }}."
+                    )
+                } else {
+                    val model = shellResult.stdoutText.trim()
+                    AdbUiResult(
+                        true,
+                        if (model.isNotBlank()) "Conectado por ADB: $model." else "Conexão ADB confirmada.",
+                        true
+                    )
+                }
+            }
         }
 
         @JavascriptInterface
@@ -448,9 +516,11 @@ class MainActivity : Activity() {
     }
 
     private fun reportAdbPairResult(success: Boolean, message: String, connected: Boolean) {
-        if (!::webView.isInitialized) return
-        val js = "window.onX1AdbPairResult && window.onX1AdbPairResult($success, ${JSONObject.quote(message)}, $connected);"
-        webView.evaluateJavascript(js, null)
+        runOnUiThread {
+            if (!::webView.isInitialized || isFinishing || isDestroyed) return@runOnUiThread
+            val js = "window.onX1AdbPairResult && window.onX1AdbPairResult($success, ${JSONObject.quote(message)}, $connected);"
+            webView.evaluateJavascript(js, null)
+        }
     }
 
     override fun onResume() {
