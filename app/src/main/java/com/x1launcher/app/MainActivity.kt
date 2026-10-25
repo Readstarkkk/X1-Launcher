@@ -19,6 +19,10 @@ import android.os.BatteryManager
 import android.os.Bundle
 import android.util.Base64
 import android.webkit.JavascriptInterface
+import io.github.rhythmcache.adb.AdbClient
+import io.github.rhythmcache.adb.FileKeyProvider
+import kotlinx.coroutines.runBlocking
+import java.io.File
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -312,6 +316,76 @@ class MainActivity : Activity() {
         fun getSystemInfo(): String = systemInfoJson()
 
         @JavascriptInterface
+        fun pairWirelessDebugging(hostInput: String, pairPort: Int, pairingCode: String, connectPort: Int) {
+            val host = hostInput.trim()
+            if (!host.matches(Regex("^[0-9a-fA-F:.]+$")) || host.length > 64 || pairPort !in 1..65535 || !pairingCode.matches(Regex("^[0-9]{6}$")) || (connectPort != 0 && connectPort !in 1..65535)) {
+                runOnUiThread { reportAdbPairResult(false, "Confira o IP, a porta (1–65535) e o código de 6 dígitos.", false) }
+                return
+            }
+            Thread {
+                var paired = false
+                var message = ""
+                var connected = false
+                try {
+                    val keyDir = File(filesDir, "adb").apply { mkdirs() }
+                    val keyProvider = FileKeyProvider(File(keyDir, "adbkey"))
+                    val result = runBlocking { AdbClient.pairTls(host, pairPort, pairingCode, keyProvider) }
+                    paired = result.isSuccess
+                    if (!paired) {
+                        message = "O pareamento foi recusado. Confira se o código ainda está válido, o IP/porta de pareamento e se os dois dispositivos estão na mesma rede."
+                    } else {
+                        message = "Pareamento ADB concluído."
+                        if (connectPort in 1..65535) {
+                            try {
+                                val model = runBlocking {
+                                    AdbClient.connectTls(host, connectPort, keyProvider).use { client ->
+                                        client.shell("getprop ro.product.model").stdoutText.trim()
+                                    }
+                                }
+                                connected = true
+                                message += if (model.isNotBlank()) " Conectado: $model." else " Conexão ADB confirmada."
+                            } catch (e: Exception) {
+                                message += " Pareado, mas a conexão não foi concluída. Confirme a porta de conexão exibida na tela principal de Depuração sem fio."
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    message = when {
+                        e.message?.contains("timeout", true) == true -> "Tempo esgotado. Verifique a rede, IP e porta de pareamento."
+                        else -> "Falha no pareamento: ${e.message?.take(180) ?: e.javaClass.simpleName}"
+                    }
+                }
+                runOnUiThread { reportAdbPairResult(paired, message, connected) }
+            }.start()
+        }
+
+        @JavascriptInterface
+        fun connectWirelessDebugging(hostInput: String, connectPort: Int) {
+            val host = hostInput.trim()
+            if (!host.matches(Regex("^[0-9a-fA-F:.]+$")) || host.length > 64 || connectPort !in 1..65535) {
+                runOnUiThread { reportAdbPairResult(false, "Informe um IP válido e a porta de conexão (1–65535).", false) }
+                return
+            }
+            Thread {
+                var connected = false
+                var message = ""
+                try {
+                    val keyProvider = FileKeyProvider(File(File(filesDir, "adb"), "adbkey"))
+                    val model = runBlocking {
+                        AdbClient.connectTls(host, connectPort, keyProvider).use { client ->
+                            client.shell("getprop ro.product.model").stdoutText.trim()
+                        }
+                    }
+                    connected = true
+                    message = if (model.isNotBlank()) "Conectado por ADB: $model." else "Conexão ADB confirmada."
+                } catch (e: Exception) {
+                    message = "Não conectou. Confirme que o pareamento foi feito e use a porta de conexão, não a porta de pareamento."
+                }
+                runOnUiThread { reportAdbPairResult(connected, message, connected) }
+            }.start()
+        }
+
+        @JavascriptInterface
         fun openDeveloperSettings(): Boolean {
             return try {
                 startActivity(Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -371,6 +445,12 @@ class MainActivity : Activity() {
                 }
             }.start()
         }
+    }
+
+    private fun reportAdbPairResult(success: Boolean, message: String, connected: Boolean) {
+        if (!::webView.isInitialized) return
+        val js = "window.onX1AdbPairResult && window.onX1AdbPairResult($success, ${JSONObject.quote(message)}, $connected);"
+        webView.evaluateJavascript(js, null)
     }
 
     override fun onResume() {

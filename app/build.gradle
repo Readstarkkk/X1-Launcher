@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId 'com.x1launcher.app'
-        minSdk 23
+        minSdk 24
         targetSdk 35
         versionCode 1
         versionName '1.0'
@@ -28,3 +28,8 @@ kotlin {
     }
 }
 
+
+
+dependencies {
+    implementation 'io.github.rhythmcache:adb-kt:1.0.0'
+}
