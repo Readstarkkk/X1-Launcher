@@ -26,6 +26,7 @@ android {
                 'META-INF/versions/9/OSGI-INF/MANIFEST.MF',
                 'META-INF/versions/17/OSGI-INF/MANIFEST.MF'
             ]
+            merges += ['META-INF/LICENSE.md']
         }
     }
 }
