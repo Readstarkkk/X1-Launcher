@@ -60,14 +60,19 @@
 </main>
 <section id="systemPage" class="page" aria-label="X1 System">
   <div class="system-hero"><h2>⚙ X1 System</h2><p>Diagnóstico do aparelho e atalhos reais do Android. Os dados são consultados quando esta página é aberta; recursos não expostos pelo Android aparecem como indisponíveis.</p><button type="button" class="system-back" id="systemBackToApps">← Voltar para X1 Apps</button></div>
-  <div class="system-group"><h3>Depuração sem fio</h3><div class="system-status" id="wirelessStatus">O X1 oferece pareamento e conexão ADB sem fio por TLS em dispositivos Android 11+. Ative Depuração sem fio no Android e informe as portas exibidas pelo sistema.</div>
+  <div class="system-group"><h3>Depuração sem fio</h3><div class="system-status" id="wirelessStatus">O X1 pode receber o código pela notificação e descobrir as portas ADB por mDNS, sem preenchê-las manualmente. Ative Depuração sem fio no Android 11+.</div>
     <div class="adb-pair-panel" id="adbPairPanel">
-      <p class="note">Ative Depuração sem fio no Android e escolha <b>Parear dispositivo com código</b>. Digite aqui o IP e a porta mostrados nessa janela, junto com o código de 6 dígitos. O aparelho e o X1 precisam estar na mesma rede Wi-Fi.</p>
+      <p class="note">Ative a Depuração sem fio no Android. O modo automático permite responder ao aviso do X1 com o código de 6 dígitos, sem preencher IP ou portas.</p>
+      <button type="button" class="primary" id="adbNotifyPairButton">Parear pela notificação (sem IP/porta)</button>
+      <p class="note">Abra “Parear dispositivo com código” no Android. Quando o aviso do X1 aparecer, responda com o código temporário. O X1 tentará descobrir os endereços automaticamente.</p>
+      <details class="adb-manual-details"><summary>Configuração manual / avançada</summary>
+      <p class="note">Use o modo manual apenas se a descoberta automática não funcionar. O IP e as portas temporárias mudam e devem ser copiados da tela atual do Android.</p>
       <label class="adb-label" for="adbHost">IP do dispositivo</label><input id="adbHost" class="adb-input" type="text" inputmode="url" autocomplete="off" placeholder="192.168.1.100">
       <div class="adb-fields-row"><div><label class="adb-label" for="adbPairPort">Porta de pareamento</label><input id="adbPairPort" class="adb-input" type="number" inputmode="numeric" min="1" max="65535" placeholder="Ex.: 37625"></div><div><label class="adb-label" for="adbPairCode">Código de 6 dígitos</label><input id="adbPairCode" class="adb-input" type="password" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div></div>
       <label class="adb-label" for="adbConnectPort">Porta de conexão (opcional)</label><input id="adbConnectPort" class="adb-input" type="number" inputmode="numeric" min="1" max="65535" placeholder="Porta mostrada na tela principal de Depuração sem fio">
       <button type="button" class="primary" id="adbPairButton">Parear dispositivo</button>
       <button type="button" class="secondary" id="adbConnectButton">Conectar dispositivo já pareado</button>
+      </details>
     </div>
 
     <div class="button-row"><button class="primary" id="openWirelessDebugging">Abrir opções do desenvolvedor ↗</button><button class="secondary" id="wirelessHelp">Como ativar</button></div>
@@ -159,8 +164,9 @@ function refreshSystemPage(){
 document.querySelectorAll("[data-x1page]").forEach(btn=>btn.addEventListener("click",()=>x1PageChange(btn.dataset.x1page)));
 $("refreshSystemMetrics").addEventListener("click",refreshSystemPage);
 $("openWirelessDebugging").addEventListener("click",()=>{try{if(window.X1&&window.X1.openDeveloperSettings&&window.X1.openDeveloperSettings()){$("wirelessStatus").textContent="Opções do desenvolvedor abertas. Na tela do Android, habilite Depuração sem fio e use o pareamento oferecido pelo próprio sistema."}else toast("Não foi possível abrir as opções do desenvolvedor.")}catch(_){toast("Não foi possível abrir as opções do desenvolvedor.")}});
+$("adbNotifyPairButton").addEventListener("click",()=>{if(!window.X1||!window.X1.startAutomaticAdbPairing){toast("Recurso disponível no APK Android atualizado.");return}try{$("wirelessStatus").textContent="Preparando notificação de pareamento…";window.X1.startAutomaticAdbPairing()}catch(_){toast("Não foi possível preparar a notificação.")}});
 $("adbPairButton").addEventListener("click",adbPairRequest);$("adbConnectButton").addEventListener("click",adbConnectRequest);
-$("wirelessHelp").addEventListener("click",()=>{$("wirelessStatus").textContent="1) No Android 11 ou superior, ative Opções do desenvolvedor e Depuração sem fio. 2) Toque em Parear dispositivo com código. 3) Informe aqui o mesmo IP, a porta de pareamento e o código de 6 dígitos da janela. 4) Para conectar automaticamente, informe também a porta de conexão que aparece na tela principal de Depuração sem fio. As portas de pareamento e conexão são diferentes; os dois dispositivos precisam estar na mesma rede.";});
+$("wirelessHelp").addEventListener("click",()=>{$("wirelessStatus").textContent="1) Ative Depuração sem fio. 2) Toque em Parear dispositivo com código e mantenha a janela aberta. 3) No X1, toque em Parear pela notificação. 4) Responda ao aviso do X1 com o código de 6 dígitos. O X1 tentará descobrir automaticamente IP e portas via mDNS. Se o Android não anunciar o serviço, abra Configuração manual / avançada.";});
 $("systemBackToApps").addEventListener("click",()=>x1PageChange("appsPage"));
 function setAdbBusy(busy){$('adbPairButton').disabled=busy;$('adbConnectButton').disabled=busy;}
 window.onX1AdbPairResult=function(success,message,connected){setAdbBusy(false);const el=$('wirelessStatus');el.textContent=(success?'✓ ':'✕ ')+message+(connected?' Estado: conectado.':'');el.style.color=success?'#d7ffd9':'#ffd0dc';if(!success)toast(message)};

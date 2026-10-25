@@ -1,6 +1,12 @@
 package com.x1launcher.app
 
+import android.Manifest
 import android.app.Activity
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.RemoteInput
 import android.app.ActivityManager
 import android.app.AppOpsManager
 import android.content.ActivityNotFoundException
@@ -45,6 +51,8 @@ class MainActivity : Activity() {
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val imagePickerRequest = 4317
     private val adbOperationActive = java.util.concurrent.atomic.AtomicBoolean(false)
+    private var pendingAdbNotificationAfterPermission = false
+    private val adbNotificationPermissionRequest = 7901
 
     private data class AdbUiResult(
         val success: Boolean,
@@ -83,6 +91,107 @@ class MainActivity : Activity() {
                 reportAdbPairResult(result.success, result.message, result.connected)
             }
         }, "X1-ADB-operation").start()
+    }
+
+    private fun startAutomaticAdbPairingNotification() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            pendingAdbNotificationAfterPermission = true
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), adbNotificationPermissionRequest)
+            return
+        }
+        postAdbPairingNotification()
+    }
+
+    private fun postAdbPairingNotification() {
+        val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channelId = AdbPairingReceiver.NOTIFICATION_CHANNEL_ID
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Pareamento ADB do X1",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Solicita o código temporário da Depuração sem fio do Android."
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            }
+            manager.createNotificationChannel(channel)
+        }
+
+        val replyIntent = Intent(this, AdbPairingReceiver::class.java).apply {
+            action = AdbPairingReceiver.ACTION_PAIR_WITH_CODE
+        }
+        val pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT or
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE else 0
+        val replyPendingIntent = PendingIntent.getBroadcast(
+            this,
+            AdbPairingReceiver.REPLY_REQUEST_CODE,
+            replyIntent,
+            pendingFlags
+        )
+        val remoteInput = RemoteInput.Builder(AdbPairingReceiver.KEY_PAIRING_CODE)
+            .setLabel("Código de 6 dígitos")
+            .build()
+        val action = Notification.Action.Builder(
+            android.R.drawable.ic_menu_send,
+            "Parear",
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).build()
+
+        val openAppIntent = PendingIntent.getActivity(
+            this,
+            7903,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0)
+        )
+        val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Notification.Builder(this, channelId)
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(this)
+        }
+        val notification = builder
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle("X1 · Pareamento ADB")
+            .setContentText("Abra a janela de pareamento do Android e responda com o código de 6 dígitos.")
+            .setContentIntent(openAppIntent)
+            .setAutoCancel(false)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setCategory(Notification.CATEGORY_STATUS)
+            .setPriority(Notification.PRIORITY_HIGH)
+            .addAction(action)
+            .build()
+        manager.notify(AdbPairingReceiver.NOTIFICATION_ID, notification)
+        reportAdbPairResult(
+            true,
+            "Notificação pronta. Abra Depuração sem fio → Parear dispositivo com código e responda à notificação do X1 com os 6 dígitos. O X1 tentará descobrir o IP e as portas automaticamente.",
+            false
+        )
+    }
+
+    @Suppress("DEPRECATION")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode != adbNotificationPermissionRequest) return
+        val wasPending = pendingAdbNotificationAfterPermission
+        pendingAdbNotificationAfterPermission = false
+        if (!wasPending) return
+        if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+            postAdbPairingNotification()
+        } else {
+            reportAdbPairResult(
+                false,
+                "O Android bloqueou as notificações. Permita notificações para o X1 nas configurações do aplicativo e tente novamente.",
+                false
+            )
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -356,6 +465,11 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun getSystemInfo(): String = systemInfoJson()
+
+        @JavascriptInterface
+        fun startAutomaticAdbPairing() {
+            runOnUiThread { startAutomaticAdbPairingNotification() }
+        }
 
         @JavascriptInterface
         fun pairWirelessDebugging(hostInput: String, pairPort: Int, pairingCode: String, connectPort: Int) {
