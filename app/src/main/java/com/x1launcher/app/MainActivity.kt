@@ -68,12 +68,17 @@ class MainActivity : Activity() {
     private fun adbPairingPreferences(): android.content.SharedPreferences =
         getSharedPreferences("x1_adb_pairing_state", MODE_PRIVATE)
 
-    private fun saveAdbPairingState(host: String) {
-        adbPairingPreferences().edit()
+    private fun saveAdbPairingState(host: String, connectPort: Int? = null) {
+        val editor = adbPairingPreferences().edit()
             .putBoolean("paired", true)
             .putString("host", host)
             .putLong("pairedAt", System.currentTimeMillis())
-            .apply()
+        if (connectPort != null && connectPort in 1..65535) {
+            editor.putInt("connectPort", connectPort)
+        } else {
+            editor.remove("connectPort")
+        }
+        editor.apply()
     }
 
     private fun adbPairingStateJson(): String {
@@ -81,6 +86,7 @@ class MainActivity : Activity() {
         return JSONObject()
             .put("paired", prefs.getBoolean("paired", false))
             .put("host", prefs.getString("host", "") ?: "")
+            .put("connectPort", prefs.getInt("connectPort", 0))
             .put("pairedAt", prefs.getLong("pairedAt", 0L))
             .toString()
     }
@@ -89,9 +95,157 @@ class MainActivity : Activity() {
         adbPairingPreferences().edit()
             .putBoolean("paired", false)
             .remove("host")
+            .remove("connectPort")
             .remove("pairedAt")
             .apply()
     }
+
+    // X1_RESOLUTION_CONTROLLER_V1
+    private data class WmSizeState(val physical: String, val override: String?) {
+        val effective: String get() = override ?: physical
+    }
+
+    private fun resolutionStatePreferences(): android.content.SharedPreferences =
+        getSharedPreferences("x1_resolution_state", MODE_PRIVATE)
+
+    private fun currentAdbConnection(): Pair<String, Int> {
+        val prefs = adbPairingPreferences()
+        if (!prefs.getBoolean("paired", false)) {
+            throw IllegalStateException("Pareie o X1 em Depuração sem fio primeiro.")
+        }
+        val host = prefs.getString("host", "")?.trim().orEmpty()
+        val port = prefs.getInt("connectPort", 0)
+        if (host.isBlank() || port !in 1..65535) {
+            throw IllegalStateException("A porta de conexão ADB não está salva. Conecte manualmente usando a porta da tela Depuração sem fio.")
+        }
+        return host to port
+    }
+
+    private fun resolutionAdbShell(host: String, port: Int, command: String): String {
+        val result = runBlocking {
+            withTimeout(20_000L) {
+                AdbClient.connectTls(
+                    host = host,
+                    port = port,
+                    keyProvider = adbKeyProvider(),
+                    handshakeTimeoutMs = 15_000L
+                ).use { client -> client.shell(command) }
+            }
+        }
+        if (!result.isSuccess) {
+            val detail = result.stderrText.trim().take(160).ifBlank { "comando ADB recusado" }
+            throw IllegalStateException(detail)
+        }
+        return result.stdoutText.trim()
+    }
+
+    private fun parseWmSize(output: String): WmSizeState {
+        val physical = Regex("Physical size:\\s*(\\d+x\\d+)", RegexOption.IGNORE_CASE)
+            .find(output)?.groupValues?.get(1)
+            ?: throw IllegalStateException("O Android não informou a resolução física: ${output.take(160)}")
+        val override = Regex("Override size:\\s*(\\d+x\\d+)", RegexOption.IGNORE_CASE)
+            .find(output)?.groupValues?.get(1)
+        return WmSizeState(physical, override)
+    }
+
+    @Synchronized
+    private fun applyResolutionForLaunch(packageName: String, preset: String): String {
+        val allowedPresets = setOf("520p", "720p", "900p", "1080p", "1440p", "2160p")
+        if (preset !in allowedPresets) throw IllegalArgumentException("perfil de resolução inválido")
+        val (host, port) = currentAdbConnection()
+        val statePrefs = resolutionStatePreferences()
+
+        // If a previous session was interrupted, restore its saved baseline before taking a new one.
+        if (statePrefs.getBoolean("active", false)) restoreOriginalResolutionWithConnection(host, port)
+
+        val before = parseWmSize(resolutionAdbShell(host, port, "wm size"))
+        val parts = before.physical.split("x")
+        val physicalWidth = parts.getOrNull(0)?.toIntOrNull()
+            ?: throw IllegalStateException("Largura física inválida")
+        val physicalHeight = parts.getOrNull(1)?.toIntOrNull()
+            ?: throw IllegalStateException("Altura física inválida")
+        if (physicalWidth <= 0 || physicalHeight <= 0) throw IllegalStateException("Dimensões físicas inválidas")
+
+        // The preset denotes the shorter edge (e.g. 720p -> 720x1600 on a 9:20 screen).
+        val requestedShortEdge = preset.removeSuffix("p").toInt()
+        val shortPhysical = minOf(physicalWidth, physicalHeight)
+        val longPhysical = maxOf(physicalWidth, physicalHeight)
+        val calculatedLong = (longPhysical.toDouble() * requestedShortEdge / shortPhysical).toInt()
+        val evenLong = if (calculatedLong % 2 == 0) calculatedLong else calculatedLong + 1
+        val target = if (physicalWidth <= physicalHeight) {
+            "${requestedShortEdge}x${evenLong}"
+        } else {
+            "${evenLong}x${requestedShortEdge}"
+        }
+
+        val saved = statePrefs.edit()
+            .putBoolean("active", true)
+            .putBoolean("originalHadOverride", before.override != null)
+            .putString("originalOverride", before.override ?: "")
+            .putString("originalPhysical", before.physical)
+            .putString("targetSize", target)
+            .putString("packageName", packageName)
+            .putLong("appliedAt", System.currentTimeMillis())
+            .commit()
+        if (!saved) throw IllegalStateException("Não foi possível salvar o estado original antes da alteração")
+
+        try {
+            resolutionAdbShell(host, port, "wm size $target")
+            val after = parseWmSize(resolutionAdbShell(host, port, "wm size"))
+            if (after.effective != target) {
+                throw IllegalStateException("O Android não confirmou a resolução solicitada (atual: ${after.effective})")
+            }
+        } catch (e: Exception) {
+            try { restoreOriginalResolutionWithConnection(host, port) } catch (_: Exception) { }
+            throw e
+        }
+        return "Resolução global aplicada: $target. Ao voltar ao X1, tentaremos restaurar a configuração anterior."
+    }
+
+    @Synchronized
+    private fun restoreOriginalResolutionBlocking(): String {
+        val statePrefs = resolutionStatePreferences()
+        if (!statePrefs.getBoolean("active", false)) return "Não há alteração de resolução do X1 pendente para restaurar."
+        val (host, port) = currentAdbConnection()
+        return restoreOriginalResolutionWithConnection(host, port)
+    }
+
+    private fun restoreOriginalResolutionWithConnection(host: String, port: Int): String {
+        val statePrefs = resolutionStatePreferences()
+        if (!statePrefs.getBoolean("active", false)) return "Não há alteração de resolução do X1 pendente para restaurar."
+        val hadOverride = statePrefs.getBoolean("originalHadOverride", false)
+        val originalOverride = statePrefs.getString("originalOverride", "")?.trim().orEmpty()
+        if (hadOverride && !Regex("^\\d+x\\d+$").matches(originalOverride)) {
+            throw IllegalStateException("A resolução anterior salva está inválida; o estado foi mantido para recuperação manual.")
+        }
+        val command = if (hadOverride) "wm size $originalOverride" else "wm size reset"
+        resolutionAdbShell(host, port, command)
+        val after = parseWmSize(resolutionAdbShell(host, port, "wm size"))
+        val restored = if (hadOverride) after.override == originalOverride else after.override == null
+        if (!restored) throw IllegalStateException("O Android não confirmou a restauração. A tentativa será mantida para repetir depois.")
+        statePrefs.edit().clear().commit()
+        return "Resolução anterior restaurada."
+    }
+
+    private fun showResolutionToast(message: String) {
+        runOnUiThread {
+            if (!::webView.isInitialized || isFinishing || isDestroyed) return@runOnUiThread
+            val quoted = org.json.JSONObject.quote(message)
+            webView.evaluateJavascript("window.toast && window.toast($quoted);", null)
+        }
+    }
+
+    private fun restoreResolutionAfterReturnIfNeeded() {
+        if (!resolutionStatePreferences().getBoolean("active", false)) return
+        Thread({
+            try {
+                showResolutionToast(restoreOriginalResolutionBlocking())
+            } catch (e: Exception) {
+                showResolutionToast("A restauração automática falhou: ${e.message?.take(150) ?: "ADB indisponível"}. Reconecte a Depuração sem fio e use Restaurar resolução original no perfil.")
+            }
+        }, "X1-resolution-restore").start()
+    }
+
 
     private fun startAdbOperation(task: suspend () -> AdbUiResult) {
         if (!adbOperationActive.compareAndSet(false, true)) {
@@ -478,14 +632,51 @@ class MainActivity : Activity() {
 
         @JavascriptInterface
         fun launchApp(packageName: String): Boolean {
-            return try {
-                val launch = packageManager.getLaunchIntentForPackage(packageName) ?: return false
-                launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(launch)
-                true
+            val launch = try {
+                packageManager.getLaunchIntentForPackage(packageName) ?: return false
             } catch (_: Exception) {
-                false
+                return false
             }
+            launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+            runOnUiThread {
+                if (!::webView.isInitialized || isFinishing || isDestroyed) {
+                    try { startActivity(launch) } catch (_: Exception) { }
+                    return@runOnUiThread
+                }
+                val script = "(function(){try{var a=JSON.parse(localStorage.getItem('x1Profiles')||'{}');var p=a[${org.json.JSONObject.quote(packageName)}]||{};return {resolution:String(p.resolution||'1080p'),autoResolution:p.autoResolution===true};}catch(e){return {resolution:'1080p',autoResolution:false};}})()"
+                webView.evaluateJavascript(script) { rawProfile ->
+                    val profile = try { org.json.JSONObject(rawProfile ?: "{}") } catch (_: Exception) { org.json.JSONObject() }
+                    val auto = profile.optBoolean("autoResolution", false)
+                    val resolution = profile.optString("resolution", "1080p")
+                    if (!auto) {
+                        try { startActivity(launch) } catch (_: Exception) {
+                            showResolutionToast("Não foi possível abrir este aplicativo.")
+                        }
+                    } else {
+                        showResolutionToast("Verificando ADB e preparando a resolução…")
+                        Thread({
+                            val resultMessage = try {
+                                applyResolutionForLaunch(packageName, resolution)
+                            } catch (e: Exception) {
+                                "Não foi possível aplicar a resolução: ${e.message?.take(180) ?: "falha na conexão ADB"}. O app será aberto sem essa alteração."
+                            }
+                            runOnUiThread {
+                                try {
+                                    startActivity(launch)
+                                    showResolutionToast(resultMessage)
+                                } catch (_: Exception) {
+                                    Thread({
+                                        try { restoreOriginalResolutionBlocking() } catch (_: Exception) { }
+                                    }, "X1-resolution-launch-rollback").start()
+                                    showResolutionToast("Não foi possível abrir o aplicativo; a restauração será tentada.")
+                                }
+                            }
+                        }, "X1-resolution-launch").start()
+                    }
+                }
+            }
+            return true
         }
 
         @JavascriptInterface
@@ -501,6 +692,17 @@ class MainActivity : Activity() {
         fun forgetAdbPairingState(): Boolean {
             clearAdbPairingState()
             return true
+        }
+
+        @JavascriptInterface
+        fun restoreOriginalResolution() {
+            Thread({
+                try {
+                    showResolutionToast(restoreOriginalResolutionBlocking())
+                } catch (e: Exception) {
+                    showResolutionToast("Não foi possível restaurar a resolução: ${e.message?.take(160) ?: "ADB indisponível"}.")
+                }
+            }, "X1-resolution-manual-restore").start()
         }
 
         @JavascriptInterface
@@ -597,7 +799,7 @@ class MainActivity : Activity() {
                         "A conexão foi aberta, mas o teste ADB falhou: ${shellResult.stderrText.trim().take(120).ifBlank { "comando recusado" }}."
                     )
                 } else {
-                    saveAdbPairingState(host)
+                    saveAdbPairingState(host, connectPort)
                     val model = shellResult.stdoutText.trim()
                     AdbUiResult(
                         true,
@@ -684,6 +886,7 @@ class MainActivity : Activity() {
             webView.evaluateJavascript("window.x1RefreshAdvanced && window.x1RefreshAdvanced();", null)
             webView.evaluateJavascript("window.x1RefreshAdbPairingState && window.x1RefreshAdbPairingState();", null)
         }
+        restoreResolutionAfterReturnIfNeeded()
     }
 
     @Deprecated("Deprecated in Android API")

@@ -97,6 +97,7 @@ class AdbPairingReceiver : BroadcastReceiver() {
         context.getSharedPreferences("x1_adb_pairing_state", Context.MODE_PRIVATE).edit()
             .putBoolean("paired", true)
             .putString("host", pairHost)
+            .remove("connectPort")
             .putLong("pairedAt", System.currentTimeMillis())
             .apply()
 
@@ -128,6 +129,12 @@ class AdbPairingReceiver : BroadcastReceiver() {
 
         if (shellResult.isSuccess) {
             val model = shellResult.stdoutText.trim().ifBlank { "dispositivo Android" }
+            context.getSharedPreferences("x1_adb_pairing_state", Context.MODE_PRIVATE).edit()
+                .putBoolean("paired", true)
+                .putString("host", connectHost)
+                .putInt("connectPort", connectService.port)
+                .putLong("pairedAt", System.currentTimeMillis())
+                .apply()
             showStatus(context, "X1 conectado por ADB", "Pareamento e conexão concluídos com $model.", true)
         } else {
             showStatus(
