@@ -69,7 +69,7 @@ class AdbPairingReceiver : BroadcastReceiver() {
         }
 
         val keyDirectory = File(context.filesDir, "adb").apply { mkdirs() }
-        val keyProvider = FileKeyProvider(File(keyDirectory, "adbkey"))
+        val keyProvider = FileKeyProvider(File(keyDirectory, "adbkey"), identityComment = "X1 Abrobinha")
         val pairResult = runBlocking {
             withTimeout(20_000L) {
                 AdbClient.pairTls(

@@ -51,6 +51,14 @@ class MainActivity : Activity() {
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val imagePickerRequest = 4317
     private val adbOperationActive = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    // O estado é atualizado fora da thread do WebView. O JavaScript apenas lê o cache.
+    @Volatile private var adbConnectedCached = false
+    @Volatile private var adbLastProbeAt = 0L
+    @Volatile private var adbMonitorTask: java.util.concurrent.ScheduledFuture<*>? = null
+    private val adbMonitorExecutor = java.util.concurrent.Executors.newSingleThreadScheduledExecutor { runnable ->
+        Thread(runnable, "X1-ADB-monitor").apply { isDaemon = true }
+    }
     private var pendingAdbNotificationAfterPermission = false
     private val adbNotificationPermissionRequest = 7901
 
@@ -62,7 +70,7 @@ class MainActivity : Activity() {
 
     private fun adbKeyProvider(): FileKeyProvider {
         val keyDirectory = File(filesDir, "adb").apply { mkdirs() }
-        return FileKeyProvider(File(keyDirectory, "adbkey"))
+        return FileKeyProvider(File(keyDirectory, "adbkey"), identityComment = "X1 Abrobinha")
     }
 
     private fun adbPairingPreferences(): android.content.SharedPreferences =
@@ -119,6 +127,50 @@ class MainActivity : Activity() {
             throw IllegalStateException("A porta de conexão ADB não está salva. Conecte manualmente usando a porta da tela Depuração sem fio.")
         }
         return host to port
+    }
+
+    /** Faz um teste TLS + shell real; pareamento salvo sozinho nunca conta como conexão. */
+    private fun probeAdbConnection(): Boolean {
+        return try {
+            val (host, port) = currentAdbConnection()
+            val result = runBlocking {
+                withTimeout(6_000L) {
+                    AdbClient.connectTls(
+                        host = host,
+                        port = port,
+                        keyProvider = adbKeyProvider(),
+                        handshakeTimeoutMs = 5_000L
+                    ).use { client -> client.shell("echo X1_ADB_PROBE") }
+                }
+            }
+            result.isSuccess && result.stdoutText.trim() == "X1_ADB_PROBE"
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    @Synchronized
+    private fun startAdbConnectionMonitor() {
+        val running = adbMonitorTask
+        if (running != null && !running.isCancelled && !running.isDone) return
+        adbMonitorTask = adbMonitorExecutor.scheduleWithFixedDelay({
+            val connected = probeAdbConnection()
+            adbConnectedCached = connected
+            adbLastProbeAt = System.currentTimeMillis()
+        }, 0L, 2L, TimeUnit.SECONDS)
+    }
+
+    @Synchronized
+    private fun stopAdbConnectionMonitor() {
+        adbMonitorTask?.cancel(true)
+        adbMonitorTask = null
+        adbConnectedCached = false
+        adbLastProbeAt = 0L
+    }
+
+    private fun isAdbConnectionFresh(): Boolean {
+        val ageMs = System.currentTimeMillis() - adbLastProbeAt
+        return adbConnectedCached && ageMs in 0L..6_000L
     }
 
     private fun resolutionAdbShell(host: String, port: Int, command: String): String {
@@ -688,6 +740,10 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun getAdbPairingState(): String = adbPairingStateJson()
 
+        // Consumido por x1IsAdbConnected() na interface Performance.
+        @JavascriptInterface
+        fun getConnected(): Boolean = isAdbConnectionFresh()
+
         @JavascriptInterface
         fun forgetAdbPairingState(): Boolean {
             clearAdbPairingState()
@@ -759,6 +815,8 @@ class MainActivity : Activity() {
 
                         if (shellResult.isSuccess) {
                             connected = true
+                            // Salva a porta de conexão (não a porta temporária de pareamento).
+                            saveAdbPairingState(host, connectPort)
                             val model = shellResult.stdoutText.trim()
                             message += if (model.isNotBlank()) " Conexão confirmada: $model." else " Conexão confirmada."
                         } else {
@@ -882,11 +940,17 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        startAdbConnectionMonitor()
         if (::webView.isInitialized) {
             webView.evaluateJavascript("window.x1RefreshAdvanced && window.x1RefreshAdvanced();", null)
             webView.evaluateJavascript("window.x1RefreshAdbPairingState && window.x1RefreshAdbPairingState();", null)
         }
         restoreResolutionAfterReturnIfNeeded()
+    }
+
+    override fun onPause() {
+        stopAdbConnectionMonitor()
+        super.onPause()
     }
 
     @Deprecated("Deprecated in Android API")
@@ -895,6 +959,8 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        stopAdbConnectionMonitor()
+        adbMonitorExecutor.shutdownNow()
         fileChooserCallback?.onReceiveValue(null)
         fileChooserCallback = null
         if (::webView.isInitialized) webView.destroy()
