@@ -27,6 +27,17 @@ jobs:
         with:
           gradle-version: '8.14.4'
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK and CMake
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-35" \
+                     "build-tools;35.0.0" \
+                     "ndk;27.2.12479018" \
+                     "cmake;3.22.1"
+
       - name: Build debug APK
         run: gradle assembleDebug --stacktrace
 
