@@ -740,7 +740,63 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun getAdbPairingState(): String = adbPairingStateJson()
 
-        // Consumido por x1IsAdbConnected() na interface Performance.
+        // O motor nativo é local ao processo do X1; não depende de ADB.
+        private fun frameGenerationStatusJson(): JSONObject {
+            val available = FrameGenerationNative.isAvailable()
+            val selfTestPassed = available && FrameGenerationNative.runSelfTest()
+            val preferences = this@MainActivity.getSharedPreferences(
+                "x1_frame_generation",
+                android.content.Context.MODE_PRIVATE
+            )
+            val storedEnabled = preferences.getBoolean("enabled", false)
+            val enabled = storedEnabled && selfTestPassed
+            if (storedEnabled && !enabled) {
+                preferences.edit().putBoolean("enabled", false).apply()
+            }
+            return JSONObject()
+                .put("ok", selfTestPassed)
+                .put("available", available)
+                .put("selfTestPassed", selfTestPassed)
+                .put("enabled", enabled)
+                .put("version", FrameGenerationNative.getVersion())
+        }
+
+        @JavascriptInterface
+        fun getFrameGenerationStatus(): String = frameGenerationStatusJson().toString()
+
+        @JavascriptInterface
+        fun setFrameGenerationEnabled(enabled: Boolean): String {
+            val status = frameGenerationStatusJson()
+            if (enabled && !status.optBoolean("selfTestPassed", false)) {
+                return status
+                    .put("ok", false)
+                    .put("message", "A biblioteca nativa não está disponível ou não passou no teste.")
+                    .toString()
+            }
+            this@MainActivity.getSharedPreferences(
+                "x1_frame_generation",
+                android.content.Context.MODE_PRIVATE
+            ).edit().putBoolean("enabled", enabled).apply()
+            return frameGenerationStatusJson()
+                .put("ok", true)
+                .put("message", if (enabled) "Módulo experimental ativado." else "Módulo experimental desativado.")
+                .toString()
+        }
+
+        @JavascriptInterface
+        fun testFrameGenerationEngine(): String {
+            val available = FrameGenerationNative.isAvailable()
+            val passed = available && FrameGenerationNative.runSelfTest()
+            return JSONObject()
+                .put("ok", passed)
+                .put("available", available)
+                .put("selfTestPassed", passed)
+                .put("version", FrameGenerationNative.getVersion())
+                .put("message", if (passed) "Mistura RGBA nativa validada." else "Falha ao carregar ou executar o núcleo nativo.")
+                .toString()
+        }
+
+        // Mantido para as rotinas ADB; não controla o módulo nativo.
         @JavascriptInterface
         fun getConnected(): Boolean = isAdbConnectionFresh()
 
